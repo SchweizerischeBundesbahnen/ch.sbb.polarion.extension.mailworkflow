@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.info.License;
 
 @OpenAPIDefinition(
         info = @Info(
-                title = "MailWorkflow REST API",
+                title = "Mail Workflow REST API",
                 version = "v1",
                 description = "",
                 termsOfService = "",

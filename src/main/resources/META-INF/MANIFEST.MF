@@ -1,5 +1,5 @@
 Support-Email: polarion-opensource@sbb.ch
-Bundle-Name: MailWorkflow for Polarion ALM
+Bundle-Name: Mail Workflow for Polarion ALM
 Require-Bundle: com.polarion.portal.tomcat,
  com.polarion.platform,
  com.sun.activation.javax.activation.patched,
