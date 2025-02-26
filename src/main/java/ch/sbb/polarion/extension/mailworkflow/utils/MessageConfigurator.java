@@ -1,0 +1,217 @@
+package ch.sbb.polarion.extension.mailworkflow.utils;
+
+import com.polarion.alm.projects.model.IUser;
+import com.polarion.alm.tracker.internal.model.ApprovalStruct;
+import com.polarion.alm.tracker.model.IWorkItem;
+import com.polarion.alm.tracker.workflow.IArguments;
+import com.polarion.alm.ui.shared.CollectionUtils;
+import com.polarion.core.util.StringUtils;
+import com.polarion.core.util.logging.Logger;
+import com.polarion.core.util.types.DateOnly;
+import lombok.experimental.UtilityClass;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.*;
+import net.fortuna.ical4j.model.property.immutable.ImmutableMethod;
+import net.fortuna.ical4j.model.property.immutable.ImmutableVersion;
+import net.fortuna.ical4j.util.RandomUidGenerator;
+import net.fortuna.ical4j.util.UidGenerator;
+import org.jetbrains.annotations.NotNull;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.time.ZoneId;
+import java.util.*;
+
+@UtilityClass
+public final class MessageConfigurator {
+    private static final Logger LOGGER = Logger.getLogger(MessageConfigurator.class);
+
+    private static final int START_OF_DAY = 9;
+
+    public static final String SENDER = "sender";
+
+    public static final String RECIPIENTS_FIELD = "recipientsField";
+    public static final String ASSIGNEES = "assignees";
+    public static final String APPROVALS = "approvals";
+    public static final String AUTHOR = "author";
+    public static final String DEFAULT_RECIPIENTS_FIELD = ASSIGNEES;
+
+    public static final String EMAIL_SUBJECT = "emailSubject";
+    public static final String DEFAULT_EMAIL_SUBJECT = "Deadline Reminder";
+
+    public static final String DATE_FIELD = "dateField";
+    public static final String DEFAULT_DATE_FIELD = "dueDate";
+
+    public static final String EVENT_SUMMARY = "eventSummary";
+    public static final String EVENT_DESCRIPTION = "eventDescription";
+    public static final String EVENT_PRIORITY = "eventPriority";
+    public static final String EVENT_CATEGORY = "eventCategory";
+    public static final String EVENT_LOCATION = "eventLocation";
+
+    public static MimeMessage configureWorkflowMessage(@NotNull MimeMessage message, @NotNull IWorkItem workItem, @NotNull IArguments arguments) throws MessagingException {
+        message.setSentDate(new Date());
+        message.addHeaderLine("X-MS-TNEF-Correlator");
+        message.addHeader("Method", Method.VALUE_REQUEST);
+        message.addHeader("Component", Component.VEVENT);
+
+        String sender = arguments.getAsString(SENDER);
+        if (StringUtils.isEmpty(sender)) {
+            throw new IllegalStateException("Missing required parameter: " + SENDER);
+        }
+        message.setFrom(new InternetAddress(sender));
+
+        String recipientsField = Objects.requireNonNull(arguments.getAsString(RECIPIENTS_FIELD, DEFAULT_RECIPIENTS_FIELD));
+        List<String> recipients = getRecipients(workItem, recipientsField);
+        if (recipients.isEmpty()) {
+            throw new IllegalStateException("No recipients specified");
+        }
+        for (String recipient : recipients) {
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
+        }
+
+        message.setSubject(arguments.getAsString(EMAIL_SUBJECT, DEFAULT_EMAIL_SUBJECT));
+
+        MimeBodyPart calendarPart = new MimeBodyPart();
+        calendarPart.addHeader("Content-Class", "urn:content-classes:calendarmessage");
+        calendarPart.addHeader("Content-ID", "calendar_message");
+        net.fortuna.ical4j.model.Calendar calendarEvent = getCalendarEvent(workItem, sender, recipients, arguments);
+        calendarPart.setContent(calendarEvent.toString(), "text/calendar;method=REQUEST; charset=UTF-8");
+
+        Multipart multipart = new MimeMultipart();
+        multipart.addBodyPart(calendarPart);
+
+        message.setContent(multipart);
+
+        return message;
+    }
+
+    private static @NotNull List<String> getRecipients(@NotNull IWorkItem workItem, @NotNull String recipientsField) {
+        return switch (recipientsField) {
+            case ASSIGNEES -> getAssigneeEmails(workItem);
+            case APPROVALS -> getApprovalEmails(workItem);
+            case AUTHOR -> getAuthorEmails(workItem);
+            default -> getCustomRecipientsFieldEmails(workItem, recipientsField);
+        };
+    }
+
+    private static @NotNull List<String> getAssigneeEmails(@NotNull IWorkItem workItem) {
+        List<String> assigneeEmails = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(workItem.getAssignees())) {
+            for (Object assignee : workItem.getAssignees()) {
+                if (assignee instanceof IUser user) {
+                    if (!StringUtils.isEmptyTrimmed(user.getEmail())) {
+                        assigneeEmails.add(user.getEmail());
+                    }
+                } else {
+                    LOGGER.error("Assignee is not a User");
+                }
+            }
+        }
+        return assigneeEmails;
+    }
+
+    private static @NotNull List<String> getApprovalEmails(@NotNull IWorkItem workItem) {
+        List<String> approvalEmails = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(workItem.getApprovals())) {
+            for (Object approval : workItem.getApprovals()) {
+                if (approval instanceof ApprovalStruct approvalStruct && approvalStruct.getUser() != null) {
+                    if (!StringUtils.isEmptyTrimmed(approvalStruct.getUser().getEmail())) {
+                        approvalEmails.add(approvalStruct.getUser().getEmail());
+                    }
+                } else {
+                    LOGGER.error("Approval is not a User");
+                }
+            }
+        }
+        return approvalEmails;
+    }
+
+    private static @NotNull List<String> getAuthorEmails(@NotNull IWorkItem workItem) {
+        IUser user = workItem.getAuthor();
+        if (user != null && !StringUtils.isEmptyTrimmed(user.getEmail())) {
+            return Collections.singletonList(user.getEmail());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    private static @NotNull List<String> getCustomRecipientsFieldEmails(@NotNull IWorkItem workItem, @NotNull String recipientsField) {
+        List<String> recipientEmails = new ArrayList<>();
+
+        Object recipients = workItem.getCustomField(recipientsField);
+        if (recipients instanceof Collection<?> recipientsList) {
+            for (Object recipient : recipientsList) {
+                if (recipient instanceof IUser user) {
+                    if (!StringUtils.isEmptyTrimmed(user.getEmail())) {
+                        recipientEmails.add(user.getEmail());
+                    }
+                } else {
+                    LOGGER.error("Recipient is not a User");
+                }
+            }
+        } else {
+            LOGGER.error("Recipients field is not a Collection");
+        }
+
+        return recipientEmails;
+    }
+
+    private static net.fortuna.ical4j.model.Calendar getCalendarEvent(@NotNull IWorkItem workItem, @NotNull String sender, @NotNull List<String> recipients, @NotNull IArguments arguments) {
+        net.fortuna.ical4j.model.Calendar calendarEvent = new net.fortuna.ical4j.model.Calendar();
+        calendarEvent.add(ImmutableVersion.VERSION_2_0);
+        calendarEvent.add(ImmutableMethod.REQUEST);
+        calendarEvent.add(new ProdId("-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
+
+        Calendar calendar = Calendar.getInstance();
+        String dateField = arguments.getAsString(DATE_FIELD, DEFAULT_DATE_FIELD);
+        Object dateValue = workItem.getValue(dateField);
+        if (dateValue instanceof Date eventDate) {
+            calendar.setTime(eventDate);
+        } else if (dateValue instanceof DateOnly eventDateOnly) {
+            calendar.setTime(eventDateOnly.getDate());
+            calendar.set(Calendar.HOUR_OF_DAY, START_OF_DAY);
+        } else {
+            throw new IllegalStateException("Wrong date field specified");
+        }
+
+        String eventSummary = arguments.getAsString(EVENT_SUMMARY, null);
+        VEvent event = new VEvent(calendar.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                eventSummary != null ? eventSummary : String.format("WorkItem %s Deadline", workItem.getId()));
+
+        UidGenerator uidGenerator = new RandomUidGenerator();
+        event.add(uidGenerator.generateUid());
+
+        event.add(new Organizer(sender));
+
+        for (String recipient : recipients) {
+            event.add(new Attendee(recipient));
+        }
+
+        String eventDescription = arguments.getAsString(EVENT_DESCRIPTION, null);
+        if (eventDescription != null) {
+            event.add(new Description(eventDescription));
+        }
+
+        String eventCategory = arguments.getAsString(EVENT_CATEGORY, null);
+        if (eventCategory != null) {
+            event.add(new Categories(eventCategory));
+        }
+
+        String eventLocation = arguments.getAsString(EVENT_LOCATION, null);
+        if (eventLocation != null) {
+            event.add(new Location(eventLocation));
+        }
+
+        event.add(new Priority(arguments.getAsInt(EVENT_PRIORITY, 0)));
+
+        calendarEvent.add(event);
+
+        return calendarEvent;
+    }
+}

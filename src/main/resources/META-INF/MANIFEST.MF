@@ -1,6 +1,8 @@
 Support-Email: polarion-opensource@sbb.ch
-Bundle-Name: Extension for Polarion ALM
+Bundle-Name: MailWorkflow for Polarion ALM
 Require-Bundle: com.polarion.portal.tomcat,
+ com.polarion.platform,
+ com.sun.activation.javax.activation.patched,
  com.polarion.alm.ui,
  com.polarion.platform.guice,
  com.polarion.alm.tracker,
@@ -12,3 +14,4 @@ Require-Bundle: com.polarion.portal.tomcat,
  slf4j.api,
  org.springframework.spring-core,
  org.springframework.spring-web
+Export-Package: ch.sbb.polarion.extension.mailworkflow
