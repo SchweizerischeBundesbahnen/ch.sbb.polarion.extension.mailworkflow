@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module id="ch.sbb.polarion.extension.mailworkflow" version="1.0.0">
+
+    <contribution configuration-id="com.polarion.alm.tracker.workflow.functions">
+        <function name="mailWorkflowFunction" clazz="ch.sbb.polarion.extension.mailworkflow.MailWorkflow">
+            <parameter name="Sender email address" id="sender"/>
+            <parameter name="WorkItem field containing recipient objects, which in their turn contain emails" id="recipientsField"/>
+            <parameter name="Subject to use in emails" id="emailSubject"/>
+            <parameter name="WorkItem field containing reminder date value" id="dateField"/>
+            <parameter name="Summary for generated calendar event" id="eventSummary"/>
+            <parameter name="Description for generated calendar event" id="eventDescription"/>
+            <parameter name="Priority for generated calendar event" id="eventPriority"/>
+            <parameter name="Category for generated calendar event" id="eventCategory"/>
+            <parameter name="Location for generated calendar event" id="eventLocation"/>
+        </function>
+    </contribution>
+
+    <contribution configuration-id="com.polarion.xray.webui.administrationPageExtenders">
+        <extender id="about"
+                  name="About"
+                  parentNodeId="mailworkflow"
+                  parentNodeName="Mail Workflow"
+                  parentNodeIconUrl="/polarion/mailworkflow-admin/ui/images/menu/30x30/_parent.svg"
+                  iconUrl="/polarion/mailworkflow-admin/ui/images/menu/16x16/about.svg"
+                  pageUrl="/polarion/mailworkflow-admin/pages/about.jsp"
+                  projectScope="true"
+                  projectGroupScope="false"
+                  repositoryScope="true"/>
+
+        <extender id="rest-api"
+                  name="REST API"
+                  parentNodeId="mailworkflow"
+                  iconUrl="/polarion/mailworkflow-admin/ui/images/menu/16x16/rest_api.svg"
+                  pageUrl="/polarion/mailworkflow/rest/swagger"
+                  projectScope="true"
+                  projectGroupScope="false"
+                  repositoryScope="true"/>
+    </contribution>
+</module>
