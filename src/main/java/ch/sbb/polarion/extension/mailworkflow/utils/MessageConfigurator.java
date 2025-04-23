@@ -59,10 +59,24 @@ public final class MessageConfigurator {
     public static final String EVENT_CATEGORY = "eventCategory";
     public static final String EVENT_LOCATION = "eventLocation";
 
+    private static final String EVENT_UID = "eventUid";
+    private static final String EVENT_SEQUENCE = "eventSequence";
+
     public static MimeMessage configureWorkflowMessage(@NotNull MimeMessage message, @NotNull IWorkItem workItem, @NotNull IArguments arguments) throws MessagingException, URISyntaxException {
+        Object eventUidObject = workItem.getCustomField(EVENT_UID);
+        String eventUid;
+        boolean updateEvent = false;
+        if (eventUidObject instanceof String) {
+            eventUid = eventUidObject.toString();
+            updateEvent = true;
+        } else {
+            eventUid = UUID.randomUUID().toString();
+        }
+        Integer eventSequence = getEventSequence(workItem);
+
         message.setSentDate(new Date());
         message.addHeaderLine("X-MS-TNEF-Correlator");
-        message.addHeader("Method", Method.VALUE_REQUEST);
+        message.addHeader("Method", updateEvent ? Method.VALUE_REQUEST : Method.VALUE_PUBLISH);
         message.addHeader("Component", Component.VEVENT);
 
         String sender = arguments.getAsString(SENDER);
@@ -94,6 +108,15 @@ public final class MessageConfigurator {
         message.setContent(multipart);
 
         return message;
+    }
+
+    private Integer getEventSequence(IWorkItem workItem) {
+        Object eventSequenceObject = workItem.getCustomField(EVENT_SEQUENCE);
+        if (eventSequenceObject instanceof Integer eventSequence) {
+            return eventSequence;
+        } else {
+            return 0;
+        }
     }
 
     private static @NotNull List<String> getRecipients(@NotNull IWorkItem workItem, @NotNull String recipientsField) {

@@ -49,6 +49,13 @@ public class MailService {
     public void sendWorkflowMessage(IWorkItem workItem, IArguments arguments) throws MessagingException, URISyntaxException {
         MimeMessage message = new MimeMessage(Session.getInstance(props, authenticator));
         send(MessageConfigurator.configureWorkflowMessage(message, workItem, arguments));
+
+//        TransactionalExecutor.executeInWriteTransaction(transaction -> {
+//            workItem.setCustomField(EVENT_UID, eventUid);
+//            workItem.setCustomField(EVENT_SEQUENCE, eventSequence + 1);
+//            workItem.save();
+//            return null;
+//        });
     }
 
     public void send(Message message) throws MessagingException {
