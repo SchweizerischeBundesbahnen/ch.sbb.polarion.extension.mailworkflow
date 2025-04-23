@@ -28,6 +28,7 @@ import javax.mail.internet.MimeMultipart;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @UtilityClass
@@ -185,8 +186,9 @@ public final class MessageConfigurator {
             throw new IllegalStateException("Wrong date field specified");
         }
 
+        ZoneId zoneId = ZoneId.systemDefault();
         String eventSummary = arguments.getAsString(EVENT_SUMMARY, null);
-        VEvent event = new VEvent(calendar.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
+        VEvent event = new VEvent(ZonedDateTime.of(calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime(), zoneId),
                 eventSummary != null ? eventSummary : String.format("WorkItem %s Deadline", workItem.getId()));
 
         UidGenerator uidGenerator = new RandomUidGenerator();
