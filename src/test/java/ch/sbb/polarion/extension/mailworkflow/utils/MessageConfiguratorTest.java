@@ -16,6 +16,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -411,7 +412,7 @@ class MessageConfiguratorTest {
         assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
         assertTrue(calendarEventContent.contains("PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
         assertTrue(calendarEventContent.contains("SUMMARY:WorkItem WI-1 Deadline"));
-        assertTrue(calendarEventContent.contains("DTSTART:" + new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(date)));
+        assertTrue(calendarEventContent.contains("DTSTART;TZID=%s:%s".formatted(ZoneId.systemDefault().getId(), new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(date))));
         assertTrue(calendarEventContent.contains("ORGANIZER:sender@company.com"));
         assertTrue(calendarEventContent.contains("ATTENDEE:recipient@company.com"));
         assertTrue(calendarEventContent.contains("PRIORITY:0"));
@@ -447,7 +448,7 @@ class MessageConfiguratorTest {
 
         assertNotNull(mimeBodyPart.getContent());
         String calendarEventContent = mimeBodyPart.getContent().toString();
-        assertTrue(calendarEventContent.contains("DTSTART:" + new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(calendar.getTime())));
+        assertTrue(calendarEventContent.contains("DTSTART;TZID=%s:%s".formatted(ZoneId.systemDefault().getId(), new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(calendar.getTime()))));
     }
 
     @Test
@@ -493,7 +494,7 @@ class MessageConfiguratorTest {
         assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
         assertTrue(calendarEventContent.contains("PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
         assertTrue(calendarEventContent.contains("SUMMARY:WorkItem WI-1 Deadline"));
-        assertTrue(calendarEventContent.contains("DTSTART:" + new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(date)));
+        assertTrue(calendarEventContent.contains("DTSTART;TZID=%s:%s".formatted(ZoneId.systemDefault().getId(), new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(date))));
         assertTrue(calendarEventContent.contains("ORGANIZER:sender@company.com"));
         assertTrue(calendarEventContent.contains("ATTENDEE:recipient@company.com"));
         assertTrue(calendarEventContent.contains("PRIORITY:0"));
