@@ -25,6 +25,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -48,13 +50,15 @@ public final class MessageConfigurator {
     public static final String DATE_FIELD = "dateField";
     public static final String DEFAULT_DATE_FIELD = "dueDate";
 
+    public static final String TEAMS_MEETING_URL_FIELD = "teamsMeetingUrlField";
+
     public static final String EVENT_SUMMARY = "eventSummary";
     public static final String EVENT_DESCRIPTION = "eventDescription";
     public static final String EVENT_PRIORITY = "eventPriority";
     public static final String EVENT_CATEGORY = "eventCategory";
     public static final String EVENT_LOCATION = "eventLocation";
 
-    public static MimeMessage configureWorkflowMessage(@NotNull MimeMessage message, @NotNull IWorkItem workItem, @NotNull IArguments arguments) throws MessagingException {
+    public static MimeMessage configureWorkflowMessage(@NotNull MimeMessage message, @NotNull IWorkItem workItem, @NotNull IArguments arguments) throws MessagingException, URISyntaxException {
         message.setSentDate(new Date());
         message.addHeaderLine("X-MS-TNEF-Correlator");
         message.addHeader("Method", Method.VALUE_REQUEST);
@@ -162,7 +166,8 @@ public final class MessageConfigurator {
         return recipientEmails;
     }
 
-    private static net.fortuna.ical4j.model.Calendar getCalendarEvent(@NotNull IWorkItem workItem, @NotNull String sender, @NotNull List<String> recipients, @NotNull IArguments arguments) {
+    private static net.fortuna.ical4j.model.Calendar getCalendarEvent(@NotNull IWorkItem workItem, @NotNull String sender,
+                                                                      @NotNull List<String> recipients, @NotNull IArguments arguments) throws URISyntaxException {
         net.fortuna.ical4j.model.Calendar calendarEvent = new net.fortuna.ical4j.model.Calendar();
         calendarEvent.add(ImmutableVersion.VERSION_2_0);
         calendarEvent.add(ImmutableMethod.REQUEST);
@@ -193,17 +198,33 @@ public final class MessageConfigurator {
             event.add(new Attendee(recipient));
         }
 
-        String eventDescription = arguments.getAsString(EVENT_DESCRIPTION, null);
-        if (eventDescription != null) {
-            event.add(new Description(eventDescription));
-        }
-
         String eventCategory = arguments.getAsString(EVENT_CATEGORY, null);
         if (eventCategory != null) {
             event.add(new Categories(eventCategory));
         }
 
+        String eventDescription = arguments.getAsString(EVENT_DESCRIPTION, null);
         String eventLocation = arguments.getAsString(EVENT_LOCATION, null);
+
+        String teamsMeetingUrlField = arguments.getAsString(TEAMS_MEETING_URL_FIELD, null);
+        Object teamsMeetingUrlObject = teamsMeetingUrlField != null ? workItem.getValue(teamsMeetingUrlField) : null;
+        if (teamsMeetingUrlObject instanceof String teamsMeetingUrl) {
+            URI teamsUri = new URI(teamsMeetingUrl);
+            Url url = new Url(teamsUri);
+            event.add(url);
+
+            eventDescription = Objects.requireNonNullElse(eventDescription, "");
+            eventDescription += System.lineSeparator() + System.lineSeparator() + "Join Microsoft Teams Meeting: " + teamsUri;
+
+            eventLocation = "Microsoft Teams Meeting";
+
+            event.add(new XProperty("X-MICROSOFT-SKYPETEAMSMEETINGURL", teamsUri.toString()));
+            event.add(new XProperty("X-MICROSOFT-DONOTFORWARDMEETING", "FALSE"));
+        }
+
+        if (eventDescription != null) {
+            event.add(new Description(eventDescription));
+        }
         if (eventLocation != null) {
             event.add(new Location(eventLocation));
         }

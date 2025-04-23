@@ -391,6 +391,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("eventDescription"), isNull())).thenReturn("eventDescription");
         when(arguments.getAsString(eq("eventCategory"), isNull())).thenReturn("eventCategory");
         when(arguments.getAsString(eq("eventLocation"), isNull())).thenReturn("eventLocation");
+        when(arguments.getAsString(eq("teamsMeetingUrlField"), isNull())).thenReturn(null);
 
         Properties props = getProperties();
         MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
@@ -458,6 +459,49 @@ class MessageConfiguratorTest {
         MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
 
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "Wrong date field specified");
+    }
+
+    @Test
+    @SneakyThrows
+    void testTeamsMeeting() {
+        Date date = new Date();
+        IWorkItem workItem = mockWorkItem(date);
+        when(workItem.getValue("teamsMeetingUrl")).thenReturn("https://microsoft.teams.meeting.url");
+
+        IArguments arguments = mockArguments();
+        when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn(null);
+        when(arguments.getAsString(eq("eventDescription"), isNull())).thenReturn("eventDescription");
+        when(arguments.getAsString(eq("eventCategory"), isNull())).thenReturn("eventCategory");
+        when(arguments.getAsString(eq("eventLocation"), isNull())).thenReturn("eventLocation");
+        when(arguments.getAsString(eq("teamsMeetingUrlField"), isNull())).thenReturn("teamsMeetingUrl");
+
+        Properties props = getProperties();
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+
+        Object content = message.getContent();
+        assertInstanceOf(Multipart.class, content);
+
+        Multipart multipart = (Multipart) content;
+        BodyPart bodyPart = multipart.getBodyPart(0);
+        assertInstanceOf(MimeBodyPart.class, bodyPart);
+
+        MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
+
+        assertNotNull(mimeBodyPart.getContent());
+        String calendarEventContent = mimeBodyPart.getContent().toString();
+        assertTrue(calendarEventContent.contains("VERSION:2.0"));
+        assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
+        assertTrue(calendarEventContent.contains("PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
+        assertTrue(calendarEventContent.contains("SUMMARY:WorkItem WI-1 Deadline"));
+        assertTrue(calendarEventContent.contains("DTSTART:" + new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(date)));
+        assertTrue(calendarEventContent.contains("ORGANIZER:sender@company.com"));
+        assertTrue(calendarEventContent.contains("ATTENDEE:recipient@company.com"));
+        assertTrue(calendarEventContent.contains("PRIORITY:0"));
+        assertTrue(calendarEventContent.contains("DESCRIPTION:eventDescription\\n\\nJoin Microsoft Teams Meeting: https://microsoft.teams.meeting.url"));
+        assertTrue(calendarEventContent.contains("CATEGORIES:eventCategory"));
+        assertTrue(calendarEventContent.contains("LOCATION:Microsoft Teams Meeting"));
+        assertTrue(calendarEventContent.contains("X-MICROSOFT-SKYPETEAMSMEETINGURL:https://microsoft.teams.meeting.url"));
+        assertTrue(calendarEventContent.contains("X-MICROSOFT-DONOTFORWARDMEETING:FALSE"));
     }
 
     private Properties getProperties() {
