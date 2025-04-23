@@ -1,113 +1,106 @@
 {
-  "openapi": "3.0.1",
-  "info": {
-    "title": "Mail Workflow REST API",
-    "version": "v1"
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Mail Workflow REST API",
+    "version" : "v1"
   },
-  "paths": {
-    "/api/context": {
-      "get": {
-        "operationId": "getContext",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Context"
+  "paths" : {
+    "/api/context" : {
+      "get" : {
+        "operationId" : "getContext",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Context"
                 }
               }
             },
-            "description": "Context information"
+            "description" : "Context information"
           }
         },
-        "summary": "Returns basic context information of Polarion's extension",
-        "tags": [
-          "Extension Information"
-        ]
+        "summary" : "Returns basic context information of Polarion's extension",
+        "tags" : [ "Extension Information" ]
       }
     },
-    "/api/version": {
-      "get": {
-        "operationId": "getVersion",
-        "responses": {
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Version"
+    "/api/version" : {
+      "get" : {
+        "operationId" : "getVersion",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Version"
                 }
               }
             },
-            "description": "Version information"
+            "description" : "Version information"
           }
         },
-        "summary": "Returns version of Polarion's extension",
-        "tags": [
-          "Extension Information"
-        ]
+        "summary" : "Returns version of Polarion's extension",
+        "tags" : [ "Extension Information" ]
       }
     }
   },
-  "components": {
-    "schemas": {
-      "Context": {
-        "description": "Represents the context for building URLs related to Polarion services",
-        "properties": {
-          "baseUrl": {
-            "description": "Returns the base URL constructed with the extension context",
-            "example": "/polarion/pdf-exporter",
-            "type": "string"
+  "components" : {
+    "schemas" : {
+      "Context" : {
+        "type" : "object",
+        "description" : "Represents the context for building URLs related to Polarion services",
+        "properties" : {
+          "baseUrl" : {
+            "type" : "string",
+            "description" : "Returns the base URL constructed with the extension context"
           },
-          "extensionContext": {
-            "description": "The extension context used as a base for URL construction",
-            "example": "pdf-exporter",
-            "type": "string"
+          "extensionContext" : {
+            "type" : "string",
+            "description" : "The extension context used as a base for URL construction"
           },
-          "restUrl": {
-            "description": "Returns the REST API URL constructed with the extension context",
-            "example": "/polarion/pdf-exporter/rest",
-            "type": "string"
+          "restUrl" : {
+            "type" : "string",
+            "description" : "Returns the REST API URL constructed with the extension context"
           },
-          "swaggerUiUrl": {
-            "description": "Returns the Swagger UI URL for the REST API",
-            "type": "string"
+          "swaggerUiUrl" : {
+            "type" : "string",
+            "description" : "Returns the Swagger UI URL for the REST API"
           }
-        },
-        "type": "object"
+        }
       },
-      "Version": {
-        "description": "Details about the software version",
-        "properties": {
-          "automaticModuleName": {
-            "description": "The automatic module name",
-            "type": "string"
+      "Version" : {
+        "type" : "object",
+        "description" : "Details about the software version",
+        "properties" : {
+          "automaticModuleName" : {
+            "type" : "string",
+            "description" : "The automatic module name"
           },
-          "bundleBuildTimestamp": {
-            "description": "The build timestamp of the bundle",
-            "type": "string"
+          "bundleBuildTimestamp" : {
+            "type" : "string",
+            "description" : "The build timestamp of the bundle"
           },
-          "bundleName": {
-            "description": "The name of the bundle",
-            "type": "string"
+          "bundleName" : {
+            "type" : "string",
+            "description" : "The name of the bundle"
           },
-          "bundleVendor": {
-            "description": "The vendor of the bundle",
-            "type": "string"
+          "bundleVendor" : {
+            "type" : "string",
+            "description" : "The vendor of the bundle"
           },
-          "bundleVersion": {
-            "description": "The version of the bundle",
-            "type": "string"
+          "bundleVersion" : {
+            "type" : "string",
+            "description" : "The version of the bundle"
           },
-          "projectURL": {
-            "description": "The project URL",
-            "type": "string"
+          "projectURL" : {
+            "type" : "string",
+            "description" : "The project URL"
           },
-          "supportEmail": {
-            "description": "Support email for the bundle",
-            "type": "string"
+          "supportEmail" : {
+            "type" : "string",
+            "description" : "Support email for the bundle"
           }
-        },
-        "type": "object"
+        }
       }
     }
   }

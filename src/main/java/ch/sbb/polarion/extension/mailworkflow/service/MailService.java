@@ -7,6 +7,7 @@ import lombok.Getter;
 
 import javax.mail.*;
 import javax.mail.internet.MimeMessage;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 @Getter
@@ -45,7 +46,7 @@ public class MailService {
         }
     }
 
-    public void sendWorkflowMessage(IWorkItem workItem, IArguments arguments) throws MessagingException {
+    public void sendWorkflowMessage(IWorkItem workItem, IArguments arguments) throws MessagingException, URISyntaxException {
         MimeMessage message = new MimeMessage(Session.getInstance(props, authenticator));
         send(MessageConfigurator.configureWorkflowMessage(message, workItem, arguments));
     }
