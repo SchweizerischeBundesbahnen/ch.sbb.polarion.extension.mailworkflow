@@ -74,7 +74,7 @@ public final class MessageConfigurator {
     private static final String EVENT_SEQUENCE = "eventSequence";
 
     public static MimeMessage configureWorkflowMessage(@NotNull MimeMessage message, @NotNull IWorkItem workItem, @NotNull IArguments arguments) throws MessagingException, URISyntaxException {
-        Object eventUidObject = workItem.getCustomField(EVENT_UID);
+        Object eventUidObject = workItem.getValue(EVENT_UID);
         String eventUid;
         boolean updateEvent = false;
         if (eventUidObject instanceof String) {
@@ -87,7 +87,7 @@ public final class MessageConfigurator {
 
         message.setSentDate(new Date());
         message.addHeaderLine("X-MS-TNEF-Correlator");
-        message.addHeader("Method", updateEvent ? Method.VALUE_REQUEST : Method.VALUE_PUBLISH);
+        message.addHeader("Method", Method.VALUE_REQUEST);
         message.addHeader("Component", Component.VEVENT);
 
         String sender = arguments.getAsString(SENDER);
@@ -110,7 +110,8 @@ public final class MessageConfigurator {
         MimeBodyPart calendarPart = new MimeBodyPart();
         calendarPart.addHeader("Content-Class", "urn:content-classes:calendarmessage");
         calendarPart.addHeader("Content-ID", "calendar_message");
-        net.fortuna.ical4j.model.Calendar calendarEvent = getCalendarEvent(workItem, sender, recipients, arguments);
+        net.fortuna.ical4j.model.Calendar calendarEvent = getCalendarEvent(workItem, sender, recipients, eventUid, eventSequence, arguments);
+
         calendarPart.setContent(calendarEvent.toString(), "text/calendar;method=REQUEST; charset=UTF-8");
 
         Multipart multipart = new MimeMultipart();
@@ -118,11 +119,14 @@ public final class MessageConfigurator {
 
         message.setContent(multipart);
 
+        workItem.setValue(EVENT_UID, eventUid);
+        workItem.setValue(EVENT_SEQUENCE, eventSequence.toString());
+
         return message;
     }
 
     private Integer getEventSequence(IWorkItem workItem) {
-        Object eventSequenceObject = workItem.getCustomField(EVENT_SEQUENCE);
+        Object eventSequenceObject = workItem.getValue(EVENT_SEQUENCE);
         if (eventSequenceObject instanceof Integer eventSequence) {
             return eventSequence;
         } else {
@@ -202,7 +206,8 @@ public final class MessageConfigurator {
     }
 
     private static net.fortuna.ical4j.model.Calendar getCalendarEvent(@NotNull IWorkItem workItem, @NotNull String sender,
-                                                                      @NotNull List<String> recipients, @NotNull IArguments arguments) throws URISyntaxException {
+                                                                      @NotNull List<String> recipients, @NotNull String eventUid, @NotNull Integer eventSequence,
+                                                                      @NotNull IArguments arguments) throws URISyntaxException {
         net.fortuna.ical4j.model.Calendar calendarEvent = new net.fortuna.ical4j.model.Calendar();
         calendarEvent.add(ImmutableVersion.VERSION_2_0);
         calendarEvent.add(ImmutableMethod.REQUEST);
