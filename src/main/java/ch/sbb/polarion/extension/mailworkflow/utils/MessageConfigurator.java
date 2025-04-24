@@ -8,14 +8,22 @@ import com.polarion.alm.ui.shared.CollectionUtils;
 import com.polarion.core.util.StringUtils;
 import com.polarion.core.util.logging.Logger;
 import com.polarion.core.util.types.DateOnly;
+import com.polarion.core.util.types.duration.DurationTime;
 import lombok.experimental.UtilityClass;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.*;
+import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.Categories;
+import net.fortuna.ical4j.model.property.Description;
+import net.fortuna.ical4j.model.property.Location;
+import net.fortuna.ical4j.model.property.Method;
+import net.fortuna.ical4j.model.property.Organizer;
+import net.fortuna.ical4j.model.property.Priority;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Url;
+import net.fortuna.ical4j.model.property.XProperty;
 import net.fortuna.ical4j.model.property.immutable.ImmutableMethod;
 import net.fortuna.ical4j.model.property.immutable.ImmutableVersion;
-import net.fortuna.ical4j.util.RandomUidGenerator;
-import net.fortuna.ical4j.util.UidGenerator;
 import org.jetbrains.annotations.NotNull;
 
 import javax.mail.Message;
@@ -25,9 +33,11 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -51,6 +61,7 @@ public final class MessageConfigurator {
     public static final String DATE_FIELD = "dateField";
     public static final String DEFAULT_DATE_FIELD = "dueDate";
 
+    public static final String EVENT_DURATION_FIELD = "eventDurationField";
     public static final String TEAMS_MEETING_URL_FIELD = "teamsMeetingUrlField";
 
     public static final String EVENT_SUMMARY = "eventSummary";
@@ -174,25 +185,18 @@ public final class MessageConfigurator {
         calendarEvent.add(ImmutableMethod.REQUEST);
         calendarEvent.add(new ProdId("-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
 
-        Calendar calendar = Calendar.getInstance();
-        String dateField = arguments.getAsString(DATE_FIELD, DEFAULT_DATE_FIELD);
-        Object dateValue = workItem.getValue(dateField);
-        if (dateValue instanceof Date eventDate) {
-            calendar.setTime(eventDate);
-        } else if (dateValue instanceof DateOnly eventDateOnly) {
-            calendar.setTime(eventDateOnly.getDate());
-            calendar.set(Calendar.HOUR_OF_DAY, START_OF_DAY);
-        } else {
-            throw new IllegalStateException("Wrong date field specified");
-        }
+        ZonedDateTime startTime = getEventStartTime(workItem, arguments);
+        Duration duration = getEventDuration(workItem, arguments);
 
-        ZoneId zoneId = ZoneId.systemDefault();
         String eventSummary = arguments.getAsString(EVENT_SUMMARY, null);
-        VEvent event = new VEvent(ZonedDateTime.of(calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime(), zoneId),
-                eventSummary != null ? eventSummary : String.format("WorkItem %s Deadline", workItem.getId()));
+        eventSummary = eventSummary != null ? eventSummary : String.format("WorkItem %s Deadline", workItem.getId());
 
-        UidGenerator uidGenerator = new RandomUidGenerator();
-        event.add(uidGenerator.generateUid());
+        final VEvent event;
+        if (duration != null) {
+            event = new VEvent(startTime, duration, eventSummary);
+        } else {
+            event = new VEvent(startTime, eventSummary);
+        }
 
         event.add(new Organizer(sender));
 
@@ -236,5 +240,32 @@ public final class MessageConfigurator {
         calendarEvent.add(event);
 
         return calendarEvent;
+    }
+
+    private ZonedDateTime getEventStartTime(@NotNull IWorkItem workItem, @NotNull IArguments arguments) {
+        Calendar calendar = Calendar.getInstance();
+        String dateField = arguments.getAsString(DATE_FIELD, DEFAULT_DATE_FIELD);
+        Object dateValue = workItem.getValue(dateField);
+        if (dateValue instanceof Date eventDate) {
+            calendar.setTime(eventDate);
+        } else if (dateValue instanceof DateOnly eventDateOnly) {
+            calendar.setTime(eventDateOnly.getDate());
+            calendar.set(Calendar.HOUR_OF_DAY, START_OF_DAY);
+        } else {
+            throw new IllegalStateException("Wrong date field specified");
+        }
+
+        ZoneId zoneId = ZoneId.systemDefault();
+        return ZonedDateTime.of(calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime(), zoneId);
+    }
+
+    private Duration getEventDuration(@NotNull IWorkItem workItem, @NotNull IArguments arguments) {
+        String eventDurationField = arguments.getAsString(EVENT_DURATION_FIELD, null);
+        Object eventDuration = eventDurationField != null ? workItem.getValue(eventDurationField) : null;
+        if (eventDuration instanceof DurationTime polarionDuration) {
+            return Duration.ZERO.plus(polarionDuration.getMillis(), ChronoUnit.MILLIS);
+        } else {
+            return null;
+        }
     }
 }

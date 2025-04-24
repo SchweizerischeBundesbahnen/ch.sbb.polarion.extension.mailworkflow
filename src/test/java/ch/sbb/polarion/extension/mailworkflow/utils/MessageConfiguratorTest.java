@@ -6,6 +6,7 @@ import com.polarion.alm.tracker.internal.model.ApprovalStruct;
 import com.polarion.alm.tracker.model.IWorkItem;
 import com.polarion.alm.tracker.workflow.IArguments;
 import com.polarion.core.util.types.DateOnly;
+import com.polarion.core.util.types.duration.DurationTime;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -392,6 +394,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("eventDescription"), isNull())).thenReturn("eventDescription");
         when(arguments.getAsString(eq("eventCategory"), isNull())).thenReturn("eventCategory");
         when(arguments.getAsString(eq("eventLocation"), isNull())).thenReturn("eventLocation");
+        when(arguments.getAsString(eq("eventDurationField"), isNull())).thenReturn("eventDuration");
         when(arguments.getAsString(eq("teamsMeetingUrlField"), isNull())).thenReturn(null);
 
         Properties props = getProperties();
@@ -464,17 +467,17 @@ class MessageConfiguratorTest {
 
     @Test
     @SneakyThrows
-    void testTeamsMeeting() {
+    void testCalendarEventWithDaysDuration() {
         Date date = new Date();
         IWorkItem workItem = mockWorkItem(date);
-        when(workItem.getValue("teamsMeetingUrl")).thenReturn("https://microsoft.teams.meeting.url");
+        when(workItem.getValue("eventDuration")).thenReturn(DurationTime.fromString("48h"));
 
         IArguments arguments = mockArguments();
         when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn(null);
         when(arguments.getAsString(eq("eventDescription"), isNull())).thenReturn("eventDescription");
         when(arguments.getAsString(eq("eventCategory"), isNull())).thenReturn("eventCategory");
         when(arguments.getAsString(eq("eventLocation"), isNull())).thenReturn("eventLocation");
-        when(arguments.getAsString(eq("teamsMeetingUrlField"), isNull())).thenReturn("teamsMeetingUrl");
+        when(arguments.getAsString(eq("eventDurationField"), isNull())).thenReturn("eventDuration");
 
         Properties props = getProperties();
         MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
@@ -490,6 +493,70 @@ class MessageConfiguratorTest {
 
         assertNotNull(mimeBodyPart.getContent());
         String calendarEventContent = mimeBodyPart.getContent().toString();
+        assertTrue(calendarEventContent.contains("DURATION:P2D"));
+    }
+
+    @Test
+    @SneakyThrows
+    void testCalendarEventWithHoursDuration() {
+        Date date = new Date();
+        IWorkItem workItem = mockWorkItem(date);
+        when(workItem.getValue("eventDuration")).thenReturn(DurationTime.fromString("2 1/2h"));
+
+        IArguments arguments = mockArguments();
+        when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn(null);
+        when(arguments.getAsString(eq("eventDescription"), isNull())).thenReturn("eventDescription");
+        when(arguments.getAsString(eq("eventCategory"), isNull())).thenReturn("eventCategory");
+        when(arguments.getAsString(eq("eventLocation"), isNull())).thenReturn("eventLocation");
+        when(arguments.getAsString(eq("eventDurationField"), isNull())).thenReturn("eventDuration");
+
+        Properties props = getProperties();
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+
+        Object content = message.getContent();
+        assertInstanceOf(Multipart.class, content);
+
+        Multipart multipart = (Multipart) content;
+        BodyPart bodyPart = multipart.getBodyPart(0);
+        assertInstanceOf(MimeBodyPart.class, bodyPart);
+
+        MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
+
+        assertNotNull(mimeBodyPart.getContent());
+        String calendarEventContent = mimeBodyPart.getContent().toString();
+        assertTrue(calendarEventContent.contains("DURATION:PT2H30M"));
+    }
+
+    @Test
+    @SneakyThrows
+    void testTeamsMeeting() {
+        Date date = new Date();
+        IWorkItem workItem = mockWorkItem(date);
+        when(workItem.getValue("teamsMeetingUrl")).thenReturn("https://microsoft.teams.meeting.url");
+
+        IArguments arguments = mockArguments();
+        when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn(null);
+        when(arguments.getAsString(eq("eventDescription"), isNull())).thenReturn("eventDescription");
+        when(arguments.getAsString(eq("eventCategory"), isNull())).thenReturn("eventCategory");
+        when(arguments.getAsString(eq("eventLocation"), isNull())).thenReturn("eventLocation");
+        when(arguments.getAsString(eq("teamsMeetingUrlField"), isNull())).thenReturn("teamsMeetingUrl");
+        when(arguments.getAsString(eq("eventDurationField"), isNull())).thenReturn(null);
+
+        Properties props = getProperties();
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+
+        Object content = message.getContent();
+        assertInstanceOf(Multipart.class, content);
+
+        Multipart multipart = (Multipart) content;
+        BodyPart bodyPart = multipart.getBodyPart(0);
+        assertInstanceOf(MimeBodyPart.class, bodyPart);
+
+        MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
+
+        assertNotNull(mimeBodyPart.getContent());
+        String calendarEventContent = mimeBodyPart.getContent().toString();
+
         assertTrue(calendarEventContent.contains("VERSION:2.0"));
         assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
         assertTrue(calendarEventContent.contains("PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
