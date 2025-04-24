@@ -388,7 +388,6 @@ class MessageConfiguratorTest {
     void testCalendarEvent() {
         Date date = new Date();
         IWorkItem workItem = mockWorkItem(date);
-//        when(workItem.getCustomField("eventDuration")).thenReturn("30m");
 
         IArguments arguments = mockArguments();
         when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn(null);
