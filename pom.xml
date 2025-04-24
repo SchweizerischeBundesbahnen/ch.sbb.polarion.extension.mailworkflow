@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>ch.sbb.polarion.extension.mailworkflow</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.3.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Polarion ALM extension to send calendar appointment from workflows</name>
