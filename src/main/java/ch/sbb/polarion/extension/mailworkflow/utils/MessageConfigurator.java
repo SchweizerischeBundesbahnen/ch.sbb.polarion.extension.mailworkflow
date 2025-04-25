@@ -24,6 +24,8 @@ import net.fortuna.ical4j.model.property.Url;
 import net.fortuna.ical4j.model.property.XProperty;
 import net.fortuna.ical4j.model.property.immutable.ImmutableMethod;
 import net.fortuna.ical4j.model.property.immutable.ImmutableVersion;
+import net.fortuna.ical4j.util.RandomUidGenerator;
+import net.fortuna.ical4j.util.UidGenerator;
 import org.jetbrains.annotations.NotNull;
 
 import javax.mail.Message;
@@ -225,6 +227,9 @@ public final class MessageConfigurator {
         } else {
             event = new VEvent(startTime, eventSummary);
         }
+
+        UidGenerator uidGenerator = new RandomUidGenerator();
+        event.add(uidGenerator.generateUid());
 
         event.add(new Organizer(sender));
 

@@ -420,6 +420,7 @@ class MessageConfiguratorTest {
         assertTrue(calendarEventContent.contains("VERSION:2.0"));
         assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
         assertTrue(calendarEventContent.contains("PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
+        assertTrue(calendarEventContent.contains("UID:"));
         assertTrue(calendarEventContent.contains("SUMMARY:WorkItem WI-1 Deadline"));
         assertTrue(calendarEventContent.contains("DTSTART;TZID=%s:%s".formatted(ZoneId.systemDefault().getId(), new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(date))));
         assertTrue(calendarEventContent.contains("ORGANIZER:sender@company.com"));
@@ -566,6 +567,7 @@ class MessageConfiguratorTest {
         assertTrue(calendarEventContent.contains("VERSION:2.0"));
         assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
         assertTrue(calendarEventContent.contains("PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
+        assertTrue(calendarEventContent.contains("UID:"));
         assertTrue(calendarEventContent.contains("SUMMARY:WorkItem WI-1 Deadline"));
         assertTrue(calendarEventContent.contains("DTSTART;TZID=%s:%s".formatted(ZoneId.systemDefault().getId(), new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(date))));
         assertTrue(calendarEventContent.contains("ORGANIZER:sender@company.com"));
