@@ -20,6 +20,7 @@ import net.fortuna.ical4j.model.property.Method;
 import net.fortuna.ical4j.model.property.Organizer;
 import net.fortuna.ical4j.model.property.Priority;
 import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Url;
 import net.fortuna.ical4j.model.property.XProperty;
 import net.fortuna.ical4j.model.property.immutable.ImmutableMethod;
@@ -76,20 +77,9 @@ public final class MessageConfigurator {
     private static final String EVENT_SEQUENCE = "eventSequence";
 
     public static MimeMessage configureWorkflowMessage(@NotNull MimeMessage message, @NotNull IWorkItem workItem, @NotNull IArguments arguments) throws MessagingException, URISyntaxException {
-        Object eventUidObject = workItem.getValue(EVENT_UID);
-        String eventUid;
-        boolean updateEvent = false;
-        if (eventUidObject instanceof String) {
-            eventUid = eventUidObject.toString();
-            updateEvent = true;
-        } else {
-            eventUid = UUID.randomUUID().toString();
-        }
-        Integer eventSequence = getEventSequence(workItem);
-
         message.setSentDate(new Date());
         message.addHeaderLine("X-MS-TNEF-Correlator");
-        message.addHeader("Method", Method.VALUE_REQUEST);
+        message.addHeader("Method", workItem.getValue(EVENT_UID) instanceof String ? Method.VALUE_REQUEST : Method.VALUE_PUBLISH);
         message.addHeader("Component", Component.VEVENT);
 
         String sender = arguments.getAsString(SENDER);
@@ -112,7 +102,7 @@ public final class MessageConfigurator {
         MimeBodyPart calendarPart = new MimeBodyPart();
         calendarPart.addHeader("Content-Class", "urn:content-classes:calendarmessage");
         calendarPart.addHeader("Content-ID", "calendar_message");
-        net.fortuna.ical4j.model.Calendar calendarEvent = getCalendarEvent(workItem, sender, recipients, eventUid, eventSequence, arguments);
+        net.fortuna.ical4j.model.Calendar calendarEvent = getCalendarEvent(workItem, sender, recipients, arguments);
 
         calendarPart.setContent(calendarEvent.toString(), "text/calendar;method=REQUEST; charset=UTF-8");
 
@@ -121,19 +111,7 @@ public final class MessageConfigurator {
 
         message.setContent(multipart);
 
-        workItem.setValue(EVENT_UID, eventUid);
-        workItem.setValue(EVENT_SEQUENCE, eventSequence.toString());
-
         return message;
-    }
-
-    private Integer getEventSequence(IWorkItem workItem) {
-        Object eventSequenceObject = workItem.getValue(EVENT_SEQUENCE);
-        if (eventSequenceObject instanceof Integer eventSequence) {
-            return eventSequence;
-        } else {
-            return 0;
-        }
     }
 
     private static @NotNull List<String> getRecipients(@NotNull IWorkItem workItem, @NotNull String recipientsField) {
@@ -207,9 +185,7 @@ public final class MessageConfigurator {
         return recipientEmails;
     }
 
-    private static net.fortuna.ical4j.model.Calendar getCalendarEvent(@NotNull IWorkItem workItem, @NotNull String sender,
-                                                                      @NotNull List<String> recipients, @NotNull String eventUid, @NotNull Integer eventSequence,
-                                                                      @NotNull IArguments arguments) throws URISyntaxException {
+    private static net.fortuna.ical4j.model.Calendar getCalendarEvent(@NotNull IWorkItem workItem, @NotNull String sender, @NotNull List<String> recipients, @NotNull IArguments arguments) throws URISyntaxException {
         net.fortuna.ical4j.model.Calendar calendarEvent = new net.fortuna.ical4j.model.Calendar();
         calendarEvent.add(ImmutableVersion.VERSION_2_0);
         calendarEvent.add(ImmutableMethod.REQUEST);
@@ -228,8 +204,11 @@ public final class MessageConfigurator {
             event = new VEvent(startTime, eventSummary);
         }
 
-        UidGenerator uidGenerator = new RandomUidGenerator();
-        event.add(uidGenerator.generateUid());
+        Uid eventUid = getEventUid(workItem);
+        event.add(eventUid);
+
+        workItem.setValue(EVENT_UID, eventUid.getValue());
+        workItem.setValue(EVENT_SEQUENCE, String.valueOf(getEventSequence(workItem) + 1));
 
         event.add(new Organizer(sender));
 
@@ -301,4 +280,26 @@ public final class MessageConfigurator {
             return null;
         }
     }
+
+    private Uid getEventUid(IWorkItem workItem) {
+        Object eventUidObject = workItem.getValue(EVENT_UID);
+        if (eventUidObject instanceof String) {
+            return new Uid(eventUidObject.toString());
+        } else {
+            return new RandomUidGenerator().generateUid();
+        }
+    }
+
+    private Integer getEventSequence(IWorkItem workItem) {
+        Object eventSequenceObject = workItem.getValue(EVENT_SEQUENCE);
+        if (eventSequenceObject instanceof String eventSequence) {
+            try {
+                return Integer.parseInt(eventSequence);
+            } catch (NumberFormatException ex) {
+                // Ignore
+            }
+        }
+        return 0; // Fallback, if no sequence or malformed value
+    }
+
 }

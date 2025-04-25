@@ -21,10 +21,14 @@ public class MailWorkflow implements IFunction<IWorkflowObject> {
             try {
                 new MailService().sendWorkflowMessage(workItem, arguments);
 
-                TransactionalExecutor.executeInWriteTransaction(transaction -> {
+                if (TransactionalExecutor.currentTransaction() == null) {
+                    TransactionalExecutor.executeInWriteTransaction(transaction -> {
+                        workItem.save();
+                        return null;
+                    });
+                } else {
                     workItem.save();
-                    return null;
-                });
+                }
             } catch (Exception e) {
                 logger.error("Email has not been sent!", e);
             }
