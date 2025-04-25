@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v1.3.1...v1.3.2) (2025-04-25)
+
+
+### Bug Fixes
+
+* Restore UID generation (accidentally removed) ([#18](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/18)) ([ea91549](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/ea9154937e217716611c2f51ebcac0e00a8c0c32))
+
 ## [1.3.1](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v1.0.0...v1.3.1) (2025-04-24)
 
 
