@@ -229,6 +229,8 @@ class MessageConfiguratorTest {
     void testValidApprovals() {
         IWorkItem workItem = mock(IWorkItem.class);
         when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
+        when(workItem.getValue("eventSequence")).thenReturn(1);
         when(workItem.getId()).thenReturn("WI-1");
 
         Collection<ApprovalStruct> approvals = new ArrayList<>();
@@ -289,6 +291,8 @@ class MessageConfiguratorTest {
     void testValidAuthor() {
         IWorkItem workItem = mock(IWorkItem.class);
         when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
+        when(workItem.getValue("eventSequence")).thenReturn(1);
         when(workItem.getId()).thenReturn("WI-1");
 
         IUser user = mock(IUser.class);
@@ -364,6 +368,8 @@ class MessageConfiguratorTest {
     void testValidCustomRecipientField() {
         IWorkItem workItem = mock(IWorkItem.class);
         when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
+        when(workItem.getValue("eventSequence")).thenReturn(1);
         when(workItem.getId()).thenReturn("WI-1");
 
         Collection<IUser> recipients = new ArrayList<>();
@@ -388,6 +394,7 @@ class MessageConfiguratorTest {
     void testCalendarEvent() {
         Date date = new Date();
         IWorkItem workItem = mockWorkItem(date);
+        when(workItem.getValue("eventDuration")).thenReturn("30m");
 
         IArguments arguments = mockArguments();
         when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn(null);
@@ -596,6 +603,8 @@ class MessageConfiguratorTest {
     private IWorkItem mockWorkItem(Object date) {
         IWorkItem workItem = mock(IWorkItem.class);
         when(workItem.getValue("dueDate")).thenReturn(date);
+        when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
+        when(workItem.getValue("eventSequence")).thenReturn(1);
         when(workItem.getId()).thenReturn("WI-1");
 
         PObjectListStub<IUser> assignees = new PObjectListStub<>();
