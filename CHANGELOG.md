@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.0.0](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v1.3.2...v2.0.0) (2025-07-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* Polarion 2506 support ([#30](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/30))
+
+### Features
+
+* Add possibility to update existing invite instead of creating duplicate ([#21](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/21)) ([d35c0f9](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/d35c0f9b41b2556fed6b830f9c0541b8e6f56db5)), closes [#9](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/9)
+* Polarion 2506 support ([#30](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/30)) ([b8276d9](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/b8276d9ff2e7e2116acf708da0420afaaa979ee2)), closes [#29](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v10.1.0 ([78725dd](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/78725ddcc7c0e5f61a281a368a6e76db06448291))
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v9 ([#24](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/24)) ([af97adf](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/af97adf33d82b00e9683f4b65b7902e3f2de0a3f))
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v9.1.0 ([779a71f](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/779a71fd7260ef7627eed5c158ea6dfe4fa3fc4a))
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v9.1.1 ([c967e6a](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/c967e6a8cbf3ff5ec09081f869133c7d49e4adf3))
+
 ## [1.3.2](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v1.3.1...v1.3.2) (2025-04-25)
 
 
