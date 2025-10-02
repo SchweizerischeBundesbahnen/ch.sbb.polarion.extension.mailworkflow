@@ -47,9 +47,9 @@ public class SendMessageRunnable implements BundleJarsPrioritizingRunnable {
         // by 'mail' prefix to comply standard JavaMail notation and to reuse Polarion's announcer configuration
         int announcerPrefixLength = ANNOUNCER_PREFIX.length();
         System.getProperties().entrySet().stream()
-                .filter(entry -> entry.getKey().toString().matches(ANNOUNCER_PREFIX + "*"))
+                .filter(entry -> entry.getKey().toString().startsWith(ANNOUNCER_PREFIX))
                 .forEach(entry -> properties.put(MAIL_PREFIX + entry.getKey().toString().substring(announcerPrefixLength), entry.getValue()));
-        return  properties;
+        return properties;
     }
 
     @VisibleForTesting

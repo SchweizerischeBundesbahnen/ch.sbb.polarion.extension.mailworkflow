@@ -26,11 +26,13 @@ class SendMessageRunnableTest {
         props.put("announcer.smtp.port", "587");
         props.put("announcer.smtp.user", "user");
         props.put("announcer.smtp.password", "password");
+        props.put("announcers.some.param", "someValue"); // This should be ignored
         System.setProperties(props);
 
         SendMessageRunnable runnable = new SendMessageRunnable();
 
         assertNotNull(runnable.getProperties());
+        assertEquals(4, runnable.getProperties().size());
         assertEquals("smtp.gmail.com", runnable.getProperties().getProperty("mail.smtp.host"));
         assertEquals("587", runnable.getProperties().getProperty("mail.smtp.port"));
         assertEquals("user", runnable.getProperties().getProperty("mail.smtp.user"));
