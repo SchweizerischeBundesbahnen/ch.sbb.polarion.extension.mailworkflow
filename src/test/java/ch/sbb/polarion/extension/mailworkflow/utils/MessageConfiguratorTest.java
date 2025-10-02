@@ -16,6 +16,8 @@ import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.*;
@@ -417,7 +419,7 @@ class MessageConfiguratorTest {
         MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
         assertTrue(calendarEventContent.contains("VERSION:2.0"));
         assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
         assertTrue(calendarEventContent.contains("PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
@@ -458,7 +460,7 @@ class MessageConfiguratorTest {
         calendar.set(Calendar.HOUR_OF_DAY, 9);
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
         assertTrue(calendarEventContent.contains("DTSTART;TZID=%s:%s".formatted(ZoneId.systemDefault().getId(), new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(calendar.getTime()))));
     }
 
@@ -500,7 +502,7 @@ class MessageConfiguratorTest {
         MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
         assertTrue(calendarEventContent.contains("DURATION:P2D"));
     }
 
@@ -531,7 +533,7 @@ class MessageConfiguratorTest {
         MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
         assertTrue(calendarEventContent.contains("DURATION:PT2H30M"));
     }
 
@@ -563,7 +565,7 @@ class MessageConfiguratorTest {
         MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
 
         assertTrue(calendarEventContent.contains("VERSION:2.0"));
         assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
@@ -624,6 +626,15 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
 
         return arguments;
+    }
+
+    @SneakyThrows
+    private String getCalendarContent(MimeBodyPart mimeBodyPart) {
+        Object content = mimeBodyPart.getContent();
+        if (content instanceof InputStream inputStream) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        return content.toString();
     }
 
 }

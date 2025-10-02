@@ -1,4 +1,4 @@
-package ch.sbb.polarion.extension.mailworkflow.service;
+package ch.sbb.polarion.extension.mailworkflow.utils;
 
 import ch.sbb.polarion.extension.generic.util.PObjectListStub;
 import com.polarion.alm.projects.model.IUser;
@@ -6,15 +6,18 @@ import com.polarion.alm.tracker.model.IWorkItem;
 import com.polarion.alm.tracker.workflow.IArguments;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
+import javax.mail.Transport;
 import java.util.Date;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-class MailServiceTest {
+class SendMessageRunnableTest {
 
     @Test
     void testInitialization() {
@@ -25,15 +28,15 @@ class MailServiceTest {
         props.put("announcer.smtp.password", "password");
         System.setProperties(props);
 
-        MailService mailService = new MailService();
+        SendMessageRunnable runnable = new SendMessageRunnable();
 
-        assertNotNull(mailService.getProps());
-        assertEquals("smtp.gmail.com", mailService.getProps().getProperty("mail.smtp.host"));
-        assertEquals("587", mailService.getProps().getProperty("mail.smtp.port"));
-        assertEquals("user", mailService.getProps().getProperty("mail.smtp.user"));
-        assertEquals("password", mailService.getProps().getProperty("mail.smtp.password"));
+        assertNotNull(runnable.getProperties());
+        assertEquals("smtp.gmail.com", runnable.getProperties().getProperty("mail.smtp.host"));
+        assertEquals("587", runnable.getProperties().getProperty("mail.smtp.port"));
+        assertEquals("user", runnable.getProperties().getProperty("mail.smtp.user"));
+        assertEquals("password", runnable.getProperties().getProperty("mail.smtp.password"));
 
-        assertNotNull(mailService.getAuthenticator());
+        assertNotNull(runnable.getAuthenticator(runnable.getProperties()));
     }
 
     @Test
@@ -47,14 +50,15 @@ class MailServiceTest {
         props.remove("mail.smtp.user");
         System.setProperties(props);
 
-        MailService mailService = new MailService();
+        SendMessageRunnable runnable = new SendMessageRunnable();
 
-        assertNull(mailService.getAuthenticator());
+        assertNull(runnable.getAuthenticator(runnable.getProperties()));
     }
 
     @Test
     @SneakyThrows
     void testSendWorkflowMessage() {
+
         IWorkItem workItem = mock(IWorkItem.class);
         when(workItem.getValue("dueDate")).thenReturn(new Date());
         when(workItem.getId()).thenReturn("WI-1");
@@ -76,9 +80,12 @@ class MailServiceTest {
         props.put("announcer.smtp.port", "587");
         System.setProperties(props);
 
-        MailService mailService = spy(MailService.class);
-        doNothing().when(mailService).send(any());
-        mailService.sendWorkflowMessage(workItem, arguments);
-        verify(mailService).send(any());
+        SendMessageRunnable runnable = new SendMessageRunnable();
+        try (MockedStatic<Transport> mockTransport = mockStatic(Transport.class)) {
+            mockTransport.when(() -> Transport.send(any(), any())).thenAnswer(invocation -> null);
+            runnable.run(Map.of("workItem", workItem, "arguments", arguments));
+            mockTransport.verify(() -> Transport.send(any(), any()), times(1));
+        }
     }
+
 }

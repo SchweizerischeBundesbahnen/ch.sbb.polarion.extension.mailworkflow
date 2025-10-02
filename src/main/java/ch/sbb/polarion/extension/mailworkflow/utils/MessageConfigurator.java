@@ -26,9 +26,9 @@ import net.fortuna.ical4j.model.property.XProperty;
 import net.fortuna.ical4j.model.property.immutable.ImmutableMethod;
 import net.fortuna.ical4j.model.property.immutable.ImmutableVersion;
 import net.fortuna.ical4j.util.RandomUidGenerator;
-import net.fortuna.ical4j.util.UidGenerator;
 import org.jetbrains.annotations.NotNull;
 
+import javax.activation.DataHandler;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -36,6 +36,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -99,12 +101,14 @@ public final class MessageConfigurator {
 
         message.setSubject(arguments.getAsString(EMAIL_SUBJECT, DEFAULT_EMAIL_SUBJECT));
 
+        String mimeType = "text/calendar; method=REQUEST; charset=UTF-8";
         MimeBodyPart calendarPart = new MimeBodyPart();
         calendarPart.addHeader("Content-Class", "urn:content-classes:calendarmessage");
         calendarPart.addHeader("Content-ID", "calendar_message");
-        net.fortuna.ical4j.model.Calendar calendarEvent = getCalendarEvent(workItem, sender, recipients, arguments);
+        calendarPart.addHeader("Content-Type", mimeType);
 
-        calendarPart.setContent(calendarEvent.toString(), "text/calendar;method=REQUEST; charset=UTF-8");
+        net.fortuna.ical4j.model.Calendar calendarEvent = getCalendarEvent(workItem, sender, recipients, arguments);
+        calendarPart.setDataHandler(new DataHandler(new ByteArrayDataSource(calendarEvent.toString().getBytes(StandardCharsets.UTF_8), mimeType)));
 
         Multipart multipart = new MimeMultipart();
         multipart.addBodyPart(calendarPart);
