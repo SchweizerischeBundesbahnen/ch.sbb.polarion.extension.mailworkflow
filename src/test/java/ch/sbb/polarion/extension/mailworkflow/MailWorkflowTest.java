@@ -14,6 +14,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class, TransactionalExecutorExtension.class})
@@ -23,13 +24,13 @@ class MailWorkflowTest {
     private MockedStatic<BundleJarsPrioritizingRunnable> prioritizingRunnableMockedStatic;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         this.prioritizingRunnableMockedStatic = Mockito.mockStatic(BundleJarsPrioritizingRunnable.class, Mockito.RETURNS_DEEP_STUBS);
         prioritizingRunnableMockedStatic.when(() -> BundleJarsPrioritizingRunnable.execute(any(), any(), anyBoolean())).thenAnswer(invocation -> null);
     }
 
     @AfterEach
-    public void afterEach() {
+    void afterEach() {
         this.prioritizingRunnableMockedStatic.close();
     }
 
@@ -58,7 +59,7 @@ class MailWorkflowTest {
 
         when(callContext.getTarget()).thenReturn(workflowObject);
 
-        mailWorkflow.execute(callContext, arguments);
+        assertDoesNotThrow(() -> mailWorkflow.execute(callContext, arguments));
     }
 
 }

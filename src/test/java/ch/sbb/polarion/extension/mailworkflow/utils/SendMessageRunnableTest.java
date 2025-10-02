@@ -136,8 +136,8 @@ class SendMessageRunnableTest {
 
         try (MockedStatic<Transport> mockTransport = mockStatic(Transport.class)) {
             mockTransport.when(() -> Transport.send(any(), any())).thenThrow(new RuntimeException("Transport error"));
-
-            assertThrows(RuntimeException.class, () -> runnable.run(Map.of("workItem", workItem, "arguments", arguments)));
+            Map<String, Object> params = Map.of("workItem", workItem, "arguments", arguments);
+            assertThrows(RuntimeException.class, () -> runnable.run(params));
         }
     }
 
