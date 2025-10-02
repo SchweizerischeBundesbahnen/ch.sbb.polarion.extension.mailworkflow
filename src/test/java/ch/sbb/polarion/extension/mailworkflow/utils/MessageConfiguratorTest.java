@@ -16,6 +16,8 @@ import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.*;
@@ -37,7 +39,7 @@ class MessageConfiguratorTest {
         IArguments arguments = mockArguments();
 
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         assertNotNull(message.getSentDate());
         assertTrue(Collections.list(message.getAllHeaderLines()).contains("X-MS-TNEF-Correlator"));
@@ -87,7 +89,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString("sender")).thenReturn(null);
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         IWorkItem workItem = mock(IWorkItem.class);
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "Missing required parameter: sender");
     }
@@ -99,7 +101,7 @@ class MessageConfiguratorTest {
 
         IArguments arguments = mockArguments();
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         assertEquals(new InternetAddress("sender@company.com"), message.getFrom()[0]);
     }
@@ -116,7 +118,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("assignees");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -133,7 +135,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("assignees");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -153,7 +155,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("assignees");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -164,7 +166,7 @@ class MessageConfiguratorTest {
 
         IArguments arguments = mockArguments();
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         assertEquals(new InternetAddress("recipient@company.com"), message.getAllRecipients()[0]);
     }
@@ -181,7 +183,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("approvals");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -198,7 +200,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("approvals");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -220,7 +222,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("approvals");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -247,7 +249,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("dateField"), anyString())).thenReturn("dueDate");
         when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         assertEquals(new InternetAddress("recipient@company.com"), message.getAllRecipients()[0]);
     }
@@ -264,7 +266,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("author");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -282,7 +284,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("author");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -305,7 +307,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("dateField"), anyString())).thenReturn("dueDate");
         when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         assertEquals(new InternetAddress("recipient@company.com"), message.getAllRecipients()[0]);
     }
@@ -322,7 +324,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("recipients");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -339,7 +341,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("recipients");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -359,7 +361,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("recipients");
 
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
     }
 
@@ -384,7 +386,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("dateField"), anyString())).thenReturn("dueDate");
         when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         assertEquals(new InternetAddress("recipient@company.com"), message.getAllRecipients()[0]);
     }
@@ -405,7 +407,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("teamsMeetingUrlField"), isNull())).thenReturn(null);
 
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         Object content = message.getContent();
         assertInstanceOf(Multipart.class, content);
@@ -417,7 +419,7 @@ class MessageConfiguratorTest {
         MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
         assertTrue(calendarEventContent.contains("VERSION:2.0"));
         assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
         assertTrue(calendarEventContent.contains("PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN"));
@@ -442,7 +444,7 @@ class MessageConfiguratorTest {
         IArguments arguments = mockArguments();
 
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         Object content = message.getContent();
         assertInstanceOf(Multipart.class, content);
@@ -458,7 +460,7 @@ class MessageConfiguratorTest {
         calendar.set(Calendar.HOUR_OF_DAY, 9);
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
         assertTrue(calendarEventContent.contains("DTSTART;TZID=%s:%s".formatted(ZoneId.systemDefault().getId(), new SimpleDateFormat("yyyyMMdd'T'HHmmss").format(calendar.getTime()))));
     }
 
@@ -468,7 +470,7 @@ class MessageConfiguratorTest {
         IWorkItem workItem = mock(IWorkItem.class);
         IArguments arguments = mock(IArguments.class);
         Properties props = getProperties();
-        MimeMessage message = new MimeMessage(Session.getInstance(props, getAuthenticator(props)));
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
 
         assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "Wrong date field specified");
     }
@@ -488,7 +490,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("eventDurationField"), isNull())).thenReturn("eventDuration");
 
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         Object content = message.getContent();
         assertInstanceOf(Multipart.class, content);
@@ -500,7 +502,7 @@ class MessageConfiguratorTest {
         MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
         assertTrue(calendarEventContent.contains("DURATION:P2D"));
     }
 
@@ -519,7 +521,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("eventDurationField"), isNull())).thenReturn("eventDuration");
 
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         Object content = message.getContent();
         assertInstanceOf(Multipart.class, content);
@@ -531,7 +533,7 @@ class MessageConfiguratorTest {
         MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
         assertTrue(calendarEventContent.contains("DURATION:PT2H30M"));
     }
 
@@ -551,7 +553,7 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("eventDurationField"), isNull())).thenReturn(null);
 
         Properties props = getProperties();
-        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getAuthenticator(props))), workItem, arguments);
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
 
         Object content = message.getContent();
         assertInstanceOf(Multipart.class, content);
@@ -563,7 +565,7 @@ class MessageConfiguratorTest {
         MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
 
         assertNotNull(mimeBodyPart.getContent());
-        String calendarEventContent = mimeBodyPart.getContent().toString();
+        String calendarEventContent = getCalendarContent(mimeBodyPart);
 
         assertTrue(calendarEventContent.contains("VERSION:2.0"));
         assertTrue(calendarEventContent.contains("METHOD:REQUEST"));
@@ -591,7 +593,7 @@ class MessageConfiguratorTest {
         return properties;
     }
 
-    private Authenticator getAuthenticator(Properties props) {
+    private Authenticator getTestAuthenticator(Properties props) {
         return new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -624,6 +626,15 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
 
         return arguments;
+    }
+
+    @SneakyThrows
+    private String getCalendarContent(MimeBodyPart mimeBodyPart) {
+        Object content = mimeBodyPart.getContent();
+        if (content instanceof InputStream inputStream) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        return content.toString();
     }
 
 }
