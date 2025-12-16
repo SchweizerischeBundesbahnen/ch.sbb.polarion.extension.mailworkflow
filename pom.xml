@@ -49,7 +49,7 @@
 
         <web.app.name>${maven-jar-plugin.Extension-Context}</web.app.name>
 
-        <ical4j.version>4.2.1</ical4j.version>
+        <ical4j.version>4.2.2</ical4j.version>
         <javax.mail.version>1.6.2</javax.mail.version>
     </properties>
 
