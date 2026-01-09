@@ -1,5 +1,28 @@
 # Changelog
 
+## [3.0.0](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v2.0.2...v3.0.0) (2026-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* polarion 2512 support ([#45](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/45))
+
+### Features
+
+* generic v12.1.0 ([#46](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/46)) ([3a9a4fc](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/3a9a4fc017613258068638371b9b695ab9f116aa))
+* polarion 2512 support ([#45](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/45)) ([d558f6c](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/d558f6c2ed0876f69013d22a7a1c70d49eda7abc))
+
+
+### Bug Fixes
+
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v11.3.0 ([35f6514](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/35f6514027c85eb19d951592d71f4610ba8b4e85))
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v12 ([#43](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/43)) ([2394a87](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/2394a87571d86bd095bf6665962ce4db36c0d1a9))
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v13.1.0 ([f33cde8](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/f33cde89c16bfb5ccd466bbfb22507cb7918c59d))
+* **deps:** update dependency org.mnode.ical4j:ical4j to v4.2.0 ([7320aa0](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/7320aa00af0787132bd4ab96099bd9e6b5801baa))
+* **deps:** update dependency org.mnode.ical4j:ical4j to v4.2.1 ([0e6a728](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/0e6a728d1ba13ab0b3f9c0453d970ced3d3bbcbb))
+* **deps:** update dependency org.mnode.ical4j:ical4j to v4.2.2 ([7474c45](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/7474c453d1cc8b22a3f2bc225bad6253225b0b6b))
+* **deps:** update dependency org.mnode.ical4j:ical4j to v4.2.3 ([a993e7d](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/a993e7d3e737248c2e2efa2587ae43f0ad7e4d5f))
+
 ## [2.0.2](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v2.0.1...v2.0.2) (2025-10-02)
 
 
