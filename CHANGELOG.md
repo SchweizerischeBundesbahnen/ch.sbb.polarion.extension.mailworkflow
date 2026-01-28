@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v3.0.0...v3.1.0) (2026-01-28)
+
+
+### Features
+
+* cached BundleJarsPrioritizingRunnable usage ([#48](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/48)) ([d30a94d](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/d30a94d18af650ea897b9152699f390e8c877f07))
+
 ## [3.0.0](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v2.0.2...v3.0.0) (2026-01-09)
 
 
