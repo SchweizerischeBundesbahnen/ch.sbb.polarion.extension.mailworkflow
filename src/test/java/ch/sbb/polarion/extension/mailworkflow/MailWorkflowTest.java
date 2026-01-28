@@ -26,7 +26,7 @@ class MailWorkflowTest {
     @BeforeEach
     void beforeEach() {
         this.prioritizingRunnableMockedStatic = Mockito.mockStatic(BundleJarsPrioritizingRunnable.class, Mockito.RETURNS_DEEP_STUBS);
-        prioritizingRunnableMockedStatic.when(() -> BundleJarsPrioritizingRunnable.execute(any(), any(), anyBoolean())).thenAnswer(invocation -> null);
+        prioritizingRunnableMockedStatic.when(() -> BundleJarsPrioritizingRunnable.executeCached(any(), any(), anyBoolean())).thenAnswer(invocation -> null);
     }
 
     @AfterEach
