@@ -25,7 +25,7 @@ public class MailWorkflow implements IFunction<IWorkflowObject> {
 
         if (workflowObject instanceof IWorkItem workItem) {
             try {
-                BundleJarsPrioritizingRunnable.execute(SendMessageRunnable.class, Map.of(PARAM_WORKITEM, workItem, PARAM_ARGUMENTS, arguments), true);
+                BundleJarsPrioritizingRunnable.executeCached(SendMessageRunnable.class, Map.of(PARAM_WORKITEM, workItem, PARAM_ARGUMENTS, arguments), true);
 
                 if (TransactionalExecutor.currentTransaction() == null) {
                     TransactionalExecutor.executeInWriteTransaction(transaction -> {
