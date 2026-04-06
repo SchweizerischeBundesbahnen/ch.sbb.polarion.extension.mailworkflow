@@ -56,7 +56,7 @@
         <maven-jar-plugin.Require-Bundle.extension>com.polarion.platform,com.sun.activation.javax.activation.patched</maven-jar-plugin.Require-Bundle.extension>
         <maven-jar-plugin.Require-Bundle>${maven-jar-plugin.Require-Bundle.common},${maven-jar-plugin.Require-Bundle.extension}</maven-jar-plugin.Require-Bundle>
 
-        <ical4j.version>4.2.4</ical4j.version>
+        <ical4j.version>4.2.5</ical4j.version>
         <javax.mail.version>1.6.2</javax.mail.version>
     </properties>
 
