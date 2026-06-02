@@ -6,12 +6,12 @@ import com.polarion.alm.tracker.workflow.IArguments;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import javax.mail.Authenticator;
-import javax.mail.Message;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.MimeMessage;
 import java.util.Map;
 import java.util.Properties;
 
