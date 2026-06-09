@@ -53,7 +53,6 @@
         <maven-jar-plugin.Require-Bundle>${maven-jar-plugin.Require-Bundle.common},${maven-jar-plugin.Require-Bundle.extension}</maven-jar-plugin.Require-Bundle>
 
         <ical4j.version>4.2.5</ical4j.version>
-        <jakarta.mail.version>2.0.2</jakarta.mail.version>
     </properties>
 
     <dependencies>
