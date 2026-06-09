@@ -49,16 +49,6 @@
 
         <web.app.name>${maven-jar-plugin.Extension-Context}</web.app.name>
 
-        <!-- Extension-specific Require-Bundle (in addition to common ones from parent POM):
-            com.polarion.platform
-            jakarta.mail
-            (jakarta.activation-api is already in Require-Bundle.common.)
-            Note: the legacy bundle com.sun.activation.javax.activation.patched
-            was removed because (a) its name contains the forbidden substring
-            "javax.activation" which trips Polarion 2606's JakartaCompatibilityChecker
-            during MANIFEST.MF scanning, and (b) Polarion 2606 no longer ships it;
-            jakarta.mail_2.0.5 + jakarta.activation-api_2.1.4 are the Jakarta replacements.
-        -->
         <maven-jar-plugin.Require-Bundle.extension>com.polarion.platform,jakarta.mail</maven-jar-plugin.Require-Bundle.extension>
         <maven-jar-plugin.Require-Bundle>${maven-jar-plugin.Require-Bundle.common},${maven-jar-plugin.Require-Bundle.extension}</maven-jar-plugin.Require-Bundle>
 
@@ -74,28 +64,16 @@
         </dependency>
 
         <dependency>
+            <groupId>com.polarion.thirdparty</groupId>
+            <artifactId>jakarta.mail_2.0.5</artifactId>
+            <version>${polarion.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.mnode.ical4j</groupId>
             <artifactId>ical4j</artifactId>
             <version>${ical4j.version}</version>
-        </dependency>
-        <!-- Provided at runtime by Polarion 2606's jakarta.mail_2.0.5 bundle
-             (resolved via Require-Bundle: jakarta.mail above). NOT bundled into
-             WEB-INF/lib because com.sun.mail:jakarta.mail:2.0.x transitively pulls
-             jakarta.activation:jakarta.activation:2.0.x whose internal classes
-             (LogSupport, MailcapFile) contain the string literals
-             "javax.activation.debug" / "javax.activation.addreverse" — these are
-             flagged by JakartaCompatibilityChecker.DetectionMethodVisitor.visitLdcInsn. -->
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>jakarta.mail</artifactId>
-            <version>${jakarta.mail.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>jakarta.activation</groupId>
-                    <artifactId>jakarta.activation</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
