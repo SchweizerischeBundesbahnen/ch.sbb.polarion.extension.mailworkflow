@@ -22,6 +22,9 @@ import static org.mockito.Mockito.*;
 
 class MailServiceTest {
 
+    // Fixed instant instead of the system clock, so tests are deterministic.
+    private static final Date FIXED_DUE_DATE = new Date(1_717_200_000_000L);
+
     @Test
     void testRegistersMailDataContentHandlerCommandMap() {
         // Loading/constructing MailService must install the command map that resolves Angus Mail content handlers,
@@ -129,7 +132,7 @@ class MailServiceTest {
 
     private IWorkItem mockWorkItem() {
         IWorkItem workItem = mock(IWorkItem.class);
-        when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("dueDate")).thenReturn(FIXED_DUE_DATE);
         when(workItem.getId()).thenReturn("WI-1");
 
         PObjectListStub<IUser> assignees = new PObjectListStub<>();

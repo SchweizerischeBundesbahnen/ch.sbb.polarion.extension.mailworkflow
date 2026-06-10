@@ -24,14 +24,12 @@ public class MailService {
     private static final String USER_PROPERTY = "mail.smtp.user";
     private static final String PASSWORD_PROPERTY = "mail.smtp.password";
 
-    static {
-        registerMailDataContentHandlers();
-    }
-
     private final Properties props;
     private final Authenticator authenticator;
 
     public MailService() {
+        registerMailDataContentHandlers();
+
         props = new Properties();
 
         // Here we replace 'announcer' prefix of Polarion specific parameters for its AnnouncerService like 'announcer.smtp.host'

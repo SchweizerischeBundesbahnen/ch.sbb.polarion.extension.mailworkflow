@@ -33,10 +33,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MessageConfiguratorTest {
 
+    // Fixed instant instead of the system clock, so tests are deterministic.
+    private static final Date FIXED_DUE_DATE = new Date(1_717_200_000_000L);
+
     @Test
     @SneakyThrows
     void testBasicInformation() {
-        IWorkItem workItem = mockWorkItem(new Date());
+        IWorkItem workItem = mockWorkItem(FIXED_DUE_DATE);
 
         IArguments arguments = mockArguments();
 
@@ -99,7 +102,7 @@ class MessageConfiguratorTest {
     @Test
     @SneakyThrows
     void testSender() {
-        IWorkItem workItem = mockWorkItem(new Date());
+        IWorkItem workItem = mockWorkItem(FIXED_DUE_DATE);
 
         IArguments arguments = mockArguments();
         Properties props = getProperties();
@@ -164,7 +167,7 @@ class MessageConfiguratorTest {
     @Test
     @SneakyThrows
     void testValidAssignees() {
-        IWorkItem workItem = mockWorkItem(new Date());
+        IWorkItem workItem = mockWorkItem(FIXED_DUE_DATE);
 
         IArguments arguments = mockArguments();
         Properties props = getProperties();
@@ -232,7 +235,7 @@ class MessageConfiguratorTest {
     @SneakyThrows
     void testValidApprovals() {
         IWorkItem workItem = mock(IWorkItem.class);
-        when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("dueDate")).thenReturn(FIXED_DUE_DATE);
         when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
         when(workItem.getValue("eventSequence")).thenReturn(1);
         when(workItem.getId()).thenReturn("WI-1");
@@ -294,7 +297,7 @@ class MessageConfiguratorTest {
     @SneakyThrows
     void testValidAuthor() {
         IWorkItem workItem = mock(IWorkItem.class);
-        when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("dueDate")).thenReturn(FIXED_DUE_DATE);
         when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
         when(workItem.getValue("eventSequence")).thenReturn(1);
         when(workItem.getId()).thenReturn("WI-1");
@@ -371,7 +374,7 @@ class MessageConfiguratorTest {
     @SneakyThrows
     void testValidCustomRecipientField() {
         IWorkItem workItem = mock(IWorkItem.class);
-        when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("dueDate")).thenReturn(FIXED_DUE_DATE);
         when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
         when(workItem.getValue("eventSequence")).thenReturn(1);
         when(workItem.getId()).thenReturn("WI-1");
@@ -396,7 +399,7 @@ class MessageConfiguratorTest {
     @Test
     @SneakyThrows
     void testCalendarEvent() {
-        Date date = new Date();
+        Date date = FIXED_DUE_DATE;
         IWorkItem workItem = mockWorkItem(date);
         when(workItem.getValue("eventDuration")).thenReturn("30m");
 
@@ -439,7 +442,7 @@ class MessageConfiguratorTest {
     @Test
     @SneakyThrows
     void testCalendarEventWithDateOnly() {
-        Date date = new Date();
+        Date date = FIXED_DUE_DATE;
         DateOnly dateOnly = new DateOnly(date);
         IWorkItem workItem = mockWorkItem(dateOnly);
 
@@ -480,7 +483,7 @@ class MessageConfiguratorTest {
     @Test
     @SneakyThrows
     void testCalendarEventWithDaysDuration() {
-        Date date = new Date();
+        Date date = FIXED_DUE_DATE;
         IWorkItem workItem = mockWorkItem(date);
         when(workItem.getValue("eventDuration")).thenReturn(DurationTime.fromString("48h"));
 
@@ -511,7 +514,7 @@ class MessageConfiguratorTest {
     @Test
     @SneakyThrows
     void testCalendarEventWithHoursDuration() {
-        Date date = new Date();
+        Date date = FIXED_DUE_DATE;
         IWorkItem workItem = mockWorkItem(date);
         when(workItem.getValue("eventDuration")).thenReturn(DurationTime.fromString("2 1/2h"));
 
@@ -542,7 +545,7 @@ class MessageConfiguratorTest {
     @Test
     @SneakyThrows
     void testTeamsMeeting() {
-        Date date = new Date();
+        Date date = FIXED_DUE_DATE;
         IWorkItem workItem = mockWorkItem(date);
         when(workItem.getValue("teamsMeetingUrl")).thenReturn("https://microsoft.teams.meeting.url");
 
@@ -664,7 +667,7 @@ class MessageConfiguratorTest {
     @SneakyThrows
     void testCustomEventSummary() {
         IWorkItem workItem = mock(IWorkItem.class);
-        when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("dueDate")).thenReturn(FIXED_DUE_DATE);
         when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
         when(workItem.getValue("eventSequence")).thenReturn(1);
 
@@ -800,7 +803,7 @@ class MessageConfiguratorTest {
 
     private IWorkItem mockWorkItemWithSequence(Object eventSequence) {
         IWorkItem workItem = mock(IWorkItem.class);
-        when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("dueDate")).thenReturn(FIXED_DUE_DATE);
         when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
         when(workItem.getValue("eventSequence")).thenReturn(eventSequence);
         when(workItem.getId()).thenReturn("WI-1");
