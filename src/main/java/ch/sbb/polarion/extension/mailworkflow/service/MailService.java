@@ -1,59 +1,44 @@
-package ch.sbb.polarion.extension.mailworkflow.utils;
+package ch.sbb.polarion.extension.mailworkflow.service;
 
-import ch.sbb.polarion.extension.generic.util.BundleJarsPrioritizingRunnable;
+import ch.sbb.polarion.extension.mailworkflow.utils.MessageConfigurator;
 import com.polarion.alm.tracker.model.IWorkItem;
 import com.polarion.alm.tracker.workflow.IArguments;
-import lombok.SneakyThrows;
-import org.jetbrains.annotations.VisibleForTesting;
+import lombok.Getter;
 
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.MimeMessage;
-import java.util.Map;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
-public class SendMessageRunnable implements BundleJarsPrioritizingRunnable {
-
-    public static final String PARAM_WORKITEM = "workItem";
-    public static final String PARAM_ARGUMENTS = "arguments";
-
+@Getter
+public class MailService {
     private static final String ANNOUNCER_PREFIX = "announcer.";
     private static final String MAIL_PREFIX = "mail.";
     private static final String USER_PROPERTY = "mail.smtp.user";
     private static final String PASSWORD_PROPERTY = "mail.smtp.password";
 
-    @Override
-    @SneakyThrows
-    public Map<String, Object> run(Map<String, Object> params) {
+    private final Properties props;
+    private final Authenticator authenticator;
 
-        IWorkItem workItem = (IWorkItem) params.get(PARAM_WORKITEM);
-        IArguments arguments = (IArguments) params.get(PARAM_ARGUMENTS);
+    public MailService() {
+        props = new Properties();
 
-        Properties props = getProperties();
-        Authenticator authenticator = getAuthenticator(props);
-        Message message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, authenticator)), workItem, arguments);
-        Transport.send(message, message.getAllRecipients());
-
-        return Map.of();
-    }
-
-    @VisibleForTesting
-    Properties getProperties() {
-        Properties properties = new Properties();
         // Here we replace 'announcer' prefix of Polarion specific parameters for its AnnouncerService like 'announcer.smtp.host'
         // by 'mail' prefix to comply standard JavaMail notation and to reuse Polarion's announcer configuration
         int announcerPrefixLength = ANNOUNCER_PREFIX.length();
         System.getProperties().entrySet().stream()
                 .filter(entry -> entry.getKey().toString().startsWith(ANNOUNCER_PREFIX))
-                .forEach(entry -> properties.put(MAIL_PREFIX + entry.getKey().toString().substring(announcerPrefixLength), entry.getValue()));
-        return properties;
+                .forEach(entry -> props.put(MAIL_PREFIX + entry.getKey().toString().substring(announcerPrefixLength), entry.getValue()));
+
+        this.authenticator = getAuthenticator(props);
     }
 
-    @VisibleForTesting
-    Authenticator getAuthenticator(Properties props) {
+    private Authenticator getAuthenticator(Properties props) {
         if (props.containsKey(USER_PROPERTY) && props.containsKey(PASSWORD_PROPERTY)) {
             return new Authenticator() {
                 @Override
@@ -64,5 +49,16 @@ public class SendMessageRunnable implements BundleJarsPrioritizingRunnable {
         } else {
             return null;
         }
+    }
+
+    public void sendWorkflowMessage(IWorkItem workItem, IArguments arguments) throws MessagingException, URISyntaxException {
+        MimeMessage message = new MimeMessage(Session.getInstance(props, authenticator));
+        send(MessageConfigurator.configureWorkflowMessage(message, workItem, arguments));
+    }
+
+    public void send(Message message) throws MessagingException {
+        // We rely on the jakarta.mail bundle provided by Polarion's OSGi runtime (declared as a Require-Bundle of this
+        // extension), so the message is sent directly without re-defining the context class loader to our own classpath.
+        Transport.send(message, message.getAllRecipients());
     }
 }
