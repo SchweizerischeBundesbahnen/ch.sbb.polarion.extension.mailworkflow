@@ -1,4 +1,4 @@
-package ch.sbb.polarion.extension.mailworkflow.utils;
+package ch.sbb.polarion.extension.mailworkflow.service;
 
 import ch.sbb.polarion.extension.generic.util.PObjectListStub;
 import com.polarion.alm.projects.model.IUser;
@@ -8,21 +8,35 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
-import javax.mail.Authenticator;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Transport;
+import jakarta.activation.CommandMap;
+import jakarta.mail.Authenticator;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Transport;
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.Map;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-class SendMessageRunnableTest {
+class MailServiceTest {
 
-    private final SendMessageRunnable runnable = new SendMessageRunnable();
+    // Fixed instant instead of the system clock, so tests are deterministic.
+    private static final Date FIXED_DUE_DATE = new Date(1_717_200_000_000L);
+
+    @Test
+    void testRegistersMailDataContentHandlerCommandMap() {
+        // Loading/constructing MailService must install the command map that resolves Angus Mail content handlers,
+        // since Polarion 2606 lacks the Jakarta Activation SPI implementation needed for mailcap-based discovery.
+        new MailService();
+        assertInstanceOf(MailDataContentHandlerCommandMap.class, CommandMap.getDefaultCommandMap());
+
+        // Idempotent: registering again must not wrap our command map into another one.
+        CommandMap afterFirst = CommandMap.getDefaultCommandMap();
+        MailService.registerMailDataContentHandlers();
+        assertSame(afterFirst, CommandMap.getDefaultCommandMap());
+    }
 
     @Test
     @SneakyThrows
@@ -35,14 +49,16 @@ class SendMessageRunnableTest {
         props.put("announcers.some.param", "someValue"); // This should be ignored
         System.setProperties(props);
 
-        assertNotNull(runnable.getProperties());
-        assertEquals(4, runnable.getProperties().size());
-        assertEquals("smtp.gmail.com", runnable.getProperties().getProperty("mail.smtp.host"));
-        assertEquals("587", runnable.getProperties().getProperty("mail.smtp.port"));
-        assertEquals("user42", runnable.getProperties().getProperty("mail.smtp.user"));
-        assertEquals("password42", runnable.getProperties().getProperty("mail.smtp.password"));
+        MailService mailService = new MailService();
 
-        Authenticator authenticator = runnable.getAuthenticator(runnable.getProperties());
+        assertNotNull(mailService.getProps());
+        assertEquals(4, mailService.getProps().size());
+        assertEquals("smtp.gmail.com", mailService.getProps().getProperty("mail.smtp.host"));
+        assertEquals("587", mailService.getProps().getProperty("mail.smtp.port"));
+        assertEquals("user42", mailService.getProps().getProperty("mail.smtp.user"));
+        assertEquals("password42", mailService.getProps().getProperty("mail.smtp.password"));
+
+        Authenticator authenticator = mailService.getAuthenticator();
         assertNotNull(authenticator);
         Method getPasswordAuthenticationMethod = Authenticator.class.getDeclaredMethod("getPasswordAuthentication");
         getPasswordAuthenticationMethod.setAccessible(true);
@@ -62,42 +78,28 @@ class SendMessageRunnableTest {
         props.remove("mail.smtp.user");
         props.remove("mail.smtp.password");
         System.setProperties(props);
-        assertNull(runnable.getAuthenticator(runnable.getProperties()));
+        assertNull(new MailService().getAuthenticator());
 
         props.put("announcer.smtp.user", "someUser");
         props.remove("announcer.smtp.password");
         props.remove("mail.smtp.user");
         props.remove("mail.smtp.password");
         System.setProperties(props);
-        assertNull(runnable.getAuthenticator(runnable.getProperties()));
+        assertNull(new MailService().getAuthenticator());
 
         props.remove("announcer.smtp.user");
         props.remove("announcer.smtp.password");
         props.remove("mail.smtp.user");
         props.remove("mail.smtp.password");
         System.setProperties(props);
-        assertNull(runnable.getAuthenticator(runnable.getProperties()));
+        assertNull(new MailService().getAuthenticator());
     }
 
     @Test
     @SneakyThrows
     void testSendWorkflowMessage() {
-
-        IWorkItem workItem = mock(IWorkItem.class);
-        when(workItem.getValue("dueDate")).thenReturn(new Date());
-        when(workItem.getId()).thenReturn("WI-1");
-
-        PObjectListStub<IUser> assignees = new PObjectListStub<>();
-        IUser user = mock(IUser.class);
-        when(user.getEmail()).thenReturn("recipient@company.com");
-        assignees.add(user);
-        when(workItem.getAssignees()).thenReturn(assignees);
-
-        IArguments arguments = mock(IArguments.class);
-        when(arguments.getAsString("sender")).thenReturn("sender@company.com");
-        when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("assignees");
-        when(arguments.getAsString(eq("dateField"), anyString())).thenReturn("dueDate");
-        when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
+        IWorkItem workItem = mockWorkItem();
+        IArguments arguments = mockArguments();
 
         Properties props = System.getProperties();
         props.put("announcer.smtp.host", "smtp.gmail.com");
@@ -106,28 +108,15 @@ class SendMessageRunnableTest {
 
         try (MockedStatic<Transport> mockTransport = mockStatic(Transport.class)) {
             mockTransport.when(() -> Transport.send(any(), any())).thenAnswer(invocation -> null);
-            runnable.run(Map.of("workItem", workItem, "arguments", arguments));
+            new MailService().sendWorkflowMessage(workItem, arguments);
             mockTransport.verify(() -> Transport.send(any(), any()), times(1));
         }
     }
 
     @Test
-    void testRunWithTransportException() {
-        IWorkItem workItem = mock(IWorkItem.class);
-        when(workItem.getValue("dueDate")).thenReturn(new Date());
-        when(workItem.getId()).thenReturn("WI-1");
-
-        PObjectListStub<IUser> assignees = new PObjectListStub<>();
-        IUser user = mock(IUser.class);
-        when(user.getEmail()).thenReturn("recipient@company.com");
-        assignees.add(user);
-        when(workItem.getAssignees()).thenReturn(assignees);
-
-        IArguments arguments = mock(IArguments.class);
-        when(arguments.getAsString("sender")).thenReturn("sender@company.com");
-        when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("assignees");
-        when(arguments.getAsString(eq("dateField"), anyString())).thenReturn("dueDate");
-        when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
+    void testSendWorkflowMessageWithTransportException() {
+        IWorkItem workItem = mockWorkItem();
+        IArguments arguments = mockArguments();
 
         Properties props = System.getProperties();
         props.put("announcer.smtp.host", "smtp.gmail.com");
@@ -136,9 +125,30 @@ class SendMessageRunnableTest {
 
         try (MockedStatic<Transport> mockTransport = mockStatic(Transport.class)) {
             mockTransport.when(() -> Transport.send(any(), any())).thenThrow(new RuntimeException("Transport error"));
-            Map<String, Object> params = Map.of("workItem", workItem, "arguments", arguments);
-            assertThrows(RuntimeException.class, () -> runnable.run(params));
+            MailService mailService = new MailService();
+            assertThrows(RuntimeException.class, () -> mailService.sendWorkflowMessage(workItem, arguments));
         }
     }
 
+    private IWorkItem mockWorkItem() {
+        IWorkItem workItem = mock(IWorkItem.class);
+        when(workItem.getValue("dueDate")).thenReturn(FIXED_DUE_DATE);
+        when(workItem.getId()).thenReturn("WI-1");
+
+        PObjectListStub<IUser> assignees = new PObjectListStub<>();
+        IUser user = mock(IUser.class);
+        when(user.getEmail()).thenReturn("recipient@company.com");
+        assignees.add(user);
+        when(workItem.getAssignees()).thenReturn(assignees);
+        return workItem;
+    }
+
+    private IArguments mockArguments() {
+        IArguments arguments = mock(IArguments.class);
+        when(arguments.getAsString("sender")).thenReturn("sender@company.com");
+        when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("assignees");
+        when(arguments.getAsString(eq("dateField"), anyString())).thenReturn("dueDate");
+        when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
+        return arguments;
+    }
 }
