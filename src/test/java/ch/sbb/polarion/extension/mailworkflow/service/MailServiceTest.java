@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
+import jakarta.activation.CommandMap;
 import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Transport;
@@ -20,6 +21,19 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class MailServiceTest {
+
+    @Test
+    void testRegistersMailDataContentHandlerCommandMap() {
+        // Loading/constructing MailService must install the command map that resolves Angus Mail content handlers,
+        // since Polarion 2606 lacks the Jakarta Activation SPI implementation needed for mailcap-based discovery.
+        new MailService();
+        assertInstanceOf(MailDataContentHandlerCommandMap.class, CommandMap.getDefaultCommandMap());
+
+        // Idempotent: registering again must not wrap our command map into another one.
+        CommandMap afterFirst = CommandMap.getDefaultCommandMap();
+        MailService.registerMailDataContentHandlers();
+        assertSame(afterFirst, CommandMap.getDefaultCommandMap());
+    }
 
     @Test
     @SneakyThrows

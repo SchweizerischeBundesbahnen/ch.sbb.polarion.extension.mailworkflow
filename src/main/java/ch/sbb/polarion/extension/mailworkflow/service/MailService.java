@@ -4,7 +4,9 @@ import ch.sbb.polarion.extension.mailworkflow.utils.MessageConfigurator;
 import com.polarion.alm.tracker.model.IWorkItem;
 import com.polarion.alm.tracker.workflow.IArguments;
 import lombok.Getter;
+import org.jetbrains.annotations.VisibleForTesting;
 
+import jakarta.activation.CommandMap;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -21,6 +23,10 @@ public class MailService {
     private static final String MAIL_PREFIX = "mail.";
     private static final String USER_PROPERTY = "mail.smtp.user";
     private static final String PASSWORD_PROPERTY = "mail.smtp.password";
+
+    static {
+        registerMailDataContentHandlers();
+    }
 
     private final Properties props;
     private final Authenticator authenticator;
@@ -60,5 +66,15 @@ public class MailService {
         // We rely on the jakarta.mail bundle provided by Polarion's OSGi runtime (declared as a Require-Bundle of this
         // extension), so the message is sent directly without re-defining the context class loader to our own classpath.
         Transport.send(message, message.getAllRecipients());
+    }
+
+    // Polarion 2606 has no Jakarta Activation SPI implementation, so JAF can't discover Angus Mail's content handlers
+    // on its own (see MailDataContentHandlerCommandMap). We register them once by wrapping the default command map.
+    @VisibleForTesting
+    static void registerMailDataContentHandlers() {
+        CommandMap current = CommandMap.getDefaultCommandMap();
+        if (!(current instanceof MailDataContentHandlerCommandMap)) {
+            CommandMap.setDefaultCommandMap(new MailDataContentHandlerCommandMap(current));
+        }
     }
 }
