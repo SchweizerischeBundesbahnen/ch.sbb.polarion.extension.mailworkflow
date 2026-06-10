@@ -6,9 +6,11 @@ import com.polarion.alm.tracker.model.IWorkItem;
 import com.polarion.alm.tracker.workflow.IArguments;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Transport;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Properties;
@@ -79,7 +81,39 @@ class MailServiceTest {
     @Test
     @SneakyThrows
     void testSendWorkflowMessage() {
+        IWorkItem workItem = mockWorkItem();
+        IArguments arguments = mockArguments();
 
+        Properties props = System.getProperties();
+        props.put("announcer.smtp.host", "smtp.gmail.com");
+        props.put("announcer.smtp.port", "587");
+        System.setProperties(props);
+
+        try (MockedStatic<Transport> mockTransport = mockStatic(Transport.class)) {
+            mockTransport.when(() -> Transport.send(any(), any())).thenAnswer(invocation -> null);
+            new MailService().sendWorkflowMessage(workItem, arguments);
+            mockTransport.verify(() -> Transport.send(any(), any()), times(1));
+        }
+    }
+
+    @Test
+    void testSendWorkflowMessageWithTransportException() {
+        IWorkItem workItem = mockWorkItem();
+        IArguments arguments = mockArguments();
+
+        Properties props = System.getProperties();
+        props.put("announcer.smtp.host", "smtp.gmail.com");
+        props.put("announcer.smtp.port", "587");
+        System.setProperties(props);
+
+        try (MockedStatic<Transport> mockTransport = mockStatic(Transport.class)) {
+            mockTransport.when(() -> Transport.send(any(), any())).thenThrow(new RuntimeException("Transport error"));
+            MailService mailService = new MailService();
+            assertThrows(RuntimeException.class, () -> mailService.sendWorkflowMessage(workItem, arguments));
+        }
+    }
+
+    private IWorkItem mockWorkItem() {
         IWorkItem workItem = mock(IWorkItem.class);
         when(workItem.getValue("dueDate")).thenReturn(new Date());
         when(workItem.getId()).thenReturn("WI-1");
@@ -89,21 +123,15 @@ class MailServiceTest {
         when(user.getEmail()).thenReturn("recipient@company.com");
         assignees.add(user);
         when(workItem.getAssignees()).thenReturn(assignees);
+        return workItem;
+    }
 
+    private IArguments mockArguments() {
         IArguments arguments = mock(IArguments.class);
         when(arguments.getAsString("sender")).thenReturn("sender@company.com");
         when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("assignees");
         when(arguments.getAsString(eq("dateField"), anyString())).thenReturn("dueDate");
         when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
-
-        Properties props = System.getProperties();
-        props.put("announcer.smtp.host", "smtp.gmail.com");
-        props.put("announcer.smtp.port", "587");
-        System.setProperties(props);
-
-        MailService mailService = spy(MailService.class);
-        doNothing().when(mailService).send(any());
-        mailService.sendWorkflowMessage(workItem, arguments);
-        verify(mailService).send(any());
+        return arguments;
     }
 }

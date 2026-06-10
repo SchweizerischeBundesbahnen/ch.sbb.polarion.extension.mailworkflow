@@ -17,6 +17,8 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
@@ -583,6 +585,162 @@ class MessageConfiguratorTest {
         assertTrue(calendarEventContent.contains("X-MICROSOFT-DONOTFORWARDMEETING:FALSE"));
     }
 
+    @Test
+    @SneakyThrows
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    void testAssigneeNotUser() {
+        IWorkItem workItem = mock(IWorkItem.class);
+
+        PObjectListStub assignees = new PObjectListStub();
+        assignees.add(mock(IWorkItem.class)); // not an IUser
+        when(workItem.getAssignees()).thenReturn(assignees);
+
+        IArguments arguments = mock(IArguments.class);
+        when(arguments.getAsString("sender")).thenReturn("sender@company.com");
+        when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("assignees");
+
+        Properties props = getProperties();
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
+        assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
+    }
+
+    @Test
+    @SneakyThrows
+    void testApprovalNotApprovalStruct() {
+        IWorkItem workItem = mock(IWorkItem.class);
+
+        Collection<Object> approvals = new ArrayList<>();
+        approvals.add(mock(IUser.class)); // not an ApprovalStruct
+        when(workItem.getApprovals()).thenReturn(approvals);
+
+        IArguments arguments = mock(IArguments.class);
+        when(arguments.getAsString("sender")).thenReturn("sender@company.com");
+        when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("approvals");
+
+        Properties props = getProperties();
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
+        assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
+    }
+
+    @Test
+    @SneakyThrows
+    void testApprovalWithNullUser() {
+        IWorkItem workItem = mock(IWorkItem.class);
+
+        Collection<ApprovalStruct> approvals = new ArrayList<>();
+        ApprovalStruct approvalStruct = mock(ApprovalStruct.class);
+        when(approvalStruct.getUser()).thenReturn(null);
+        approvals.add(approvalStruct);
+        when(workItem.getApprovals()).thenReturn(approvals);
+
+        IArguments arguments = mock(IArguments.class);
+        when(arguments.getAsString("sender")).thenReturn("sender@company.com");
+        when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("approvals");
+
+        Properties props = getProperties();
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
+        assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
+    }
+
+    @Test
+    @SneakyThrows
+    void testCustomRecipientNotUser() {
+        IWorkItem workItem = mock(IWorkItem.class);
+
+        Collection<Object> recipients = new ArrayList<>();
+        recipients.add("not-a-user"); // not an IUser
+        when(workItem.getCustomField("recipients")).thenReturn(recipients);
+
+        IArguments arguments = mock(IArguments.class);
+        when(arguments.getAsString("sender")).thenReturn("sender@company.com");
+        when(arguments.getAsString(eq("recipientsField"), anyString())).thenReturn("recipients");
+
+        Properties props = getProperties();
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
+        assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "No recipients specified");
+    }
+
+    @Test
+    @SneakyThrows
+    void testCustomEventSummary() {
+        IWorkItem workItem = mock(IWorkItem.class);
+        when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
+        when(workItem.getValue("eventSequence")).thenReturn(1);
+
+        PObjectListStub<IUser> assignees = new PObjectListStub<>();
+        IUser user = mock(IUser.class);
+        when(user.getEmail()).thenReturn("recipient@company.com");
+        assignees.add(user);
+        when(workItem.getAssignees()).thenReturn(assignees);
+
+        IArguments arguments = mockCalendarArguments();
+        when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn("Custom Summary");
+
+        Properties props = getProperties();
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
+
+        MimeBodyPart mimeBodyPart = (MimeBodyPart) ((Multipart) message.getContent()).getBodyPart(0);
+        assertTrue(getCalendarContent(mimeBodyPart).contains("SUMMARY:Custom Summary"));
+    }
+
+    @Test
+    @SneakyThrows
+    void testInvalidDateField() {
+        IWorkItem workItem = mock(IWorkItem.class);
+        when(workItem.getValue("eventUid")).thenReturn(null);
+        when(workItem.getValue("dueDate")).thenReturn("not-a-date"); // neither Date nor DateOnly
+
+        PObjectListStub<IUser> assignees = new PObjectListStub<>();
+        IUser user = mock(IUser.class);
+        when(user.getEmail()).thenReturn("recipient@company.com");
+        assignees.add(user);
+        when(workItem.getAssignees()).thenReturn(assignees);
+
+        IArguments arguments = mockArguments();
+
+        Properties props = getProperties();
+        MimeMessage message = new MimeMessage(Session.getInstance(props, getTestAuthenticator(props)));
+        assertThrows(IllegalStateException.class, () -> MessageConfigurator.configureWorkflowMessage(message, workItem, arguments), "Wrong date field specified");
+    }
+
+    @Test
+    @SneakyThrows
+    void testEventSequenceAsString() {
+        IWorkItem workItem = mockWorkItemWithSequence("5"); // parseable -> goes through Integer.parseInt
+
+        IArguments arguments = mockCalendarArguments();
+        when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn(null);
+
+        Properties props = getProperties();
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
+
+        assertEquals(new InternetAddress("recipient@company.com"), message.getAllRecipients()[0]);
+    }
+
+    @Test
+    @SneakyThrows
+    void testEventSequenceMalformed() {
+        IWorkItem workItem = mockWorkItemWithSequence("not-a-number"); // triggers NumberFormatException -> fallback
+
+        IArguments arguments = mockCalendarArguments();
+        when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn(null);
+
+        Properties props = getProperties();
+        MimeMessage message = MessageConfigurator.configureWorkflowMessage(new MimeMessage(Session.getInstance(props, getTestAuthenticator(props))), workItem, arguments);
+
+        assertEquals(new InternetAddress("recipient@company.com"), message.getAllRecipients()[0]);
+    }
+
+    @Test
+    @SneakyThrows
+    void testUtilityClassConstructorThrows() {
+        Constructor<MessageConfigurator> constructor = MessageConfigurator.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        InvocationTargetException exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
+        assertInstanceOf(UnsupportedOperationException.class, exception.getCause());
+    }
+
     private Properties getProperties() {
         Properties properties = new Properties();
         properties.put("mail.smtp.host", "smtp.gmail.com");
@@ -626,6 +784,34 @@ class MessageConfiguratorTest {
         when(arguments.getAsString(eq("emailSubject"), anyString())).thenReturn("Deadline Reminder");
 
         return arguments;
+    }
+
+    // Arguments for tests that run the full calendar-event build: every optional field is queried with a null default,
+    // so all of them must be stubbed to keep Mockito's strict stubbing happy.
+    private IArguments mockCalendarArguments() {
+        IArguments arguments = mockArguments();
+        when(arguments.getAsString(eq("eventDescription"), isNull())).thenReturn(null);
+        when(arguments.getAsString(eq("eventCategory"), isNull())).thenReturn(null);
+        when(arguments.getAsString(eq("eventLocation"), isNull())).thenReturn(null);
+        when(arguments.getAsString(eq("eventDurationField"), isNull())).thenReturn(null);
+        when(arguments.getAsString(eq("teamsMeetingUrlField"), isNull())).thenReturn(null);
+        return arguments;
+    }
+
+    private IWorkItem mockWorkItemWithSequence(Object eventSequence) {
+        IWorkItem workItem = mock(IWorkItem.class);
+        when(workItem.getValue("dueDate")).thenReturn(new Date());
+        when(workItem.getValue("eventUid")).thenReturn(UUID.randomUUID().toString());
+        when(workItem.getValue("eventSequence")).thenReturn(eventSequence);
+        when(workItem.getId()).thenReturn("WI-1");
+
+        PObjectListStub<IUser> assignees = new PObjectListStub<>();
+        IUser user = mock(IUser.class);
+        when(user.getEmail()).thenReturn("recipient@company.com");
+        assignees.add(user);
+        when(workItem.getAssignees()).thenReturn(assignees);
+
+        return workItem;
     }
 
     @SneakyThrows
