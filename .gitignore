@@ -51,3 +51,10 @@ node_modules/
 .classpath
 .factorypath
 .settings/
+
+# Generated Vite bundle, copied into the webapp resources by the Maven build
+src/main/resources/webapp/mailworkflow-app/app/
+
+# ui/: local node install (frontend-maven-plugin) and dependencies
+node/
+node_modules/

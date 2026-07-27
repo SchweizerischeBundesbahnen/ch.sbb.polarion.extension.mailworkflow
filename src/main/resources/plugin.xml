@@ -16,4 +16,11 @@
                 contextRoot="webapp/mailworkflow-admin">
         </webapp>
     </extension>
+    <extension
+            point="com.polarion.portal.tomcat.webapps">
+        <webapp
+                name="polarion/mailworkflow-app"
+                contextRoot="webapp/mailworkflow-app">
+        </webapp>
+    </extension>
 </plugin>
