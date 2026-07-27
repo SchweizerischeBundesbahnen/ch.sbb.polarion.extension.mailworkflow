@@ -65,5 +65,5 @@ under `ui/`. They are check-only and never modify your files.
 `npm run build` emits the bundle to `ui/dist/app` with base path
 `/polarion/mailworkflow-app/ui/app/`. The Maven build (frontend-maven-plugin +
 maven-resources-plugin) runs this automatically and copies the bundle into
-`src/main/resources/webapp/mailworkflow-app/app`, where `AadSynchronizerAppServlet` serves it at
+`src/main/resources/webapp/mailworkflow-app/app`, where `MailWorkflowAppServlet` serves it at
 `/polarion/mailworkflow-app/ui/app/index.html`.

@@ -37,10 +37,9 @@
     </session-config>
 
     <!-- Static, non-sensitive assets served without authentication: the app's own bundle assets and
-         the shared generic UI toolkit (JS/CSS). Exempting /ui/generic/* lets these load same-origin
-         in Polarion and lets the vite dev proxy fetch them without a Polarion session. The editor
-         panel bundle (assets/jsonEditorPanel.js) is under /ui/app/assets, so it loads inside the
-         WorkItem/Document editor without a fresh auth round-trip. -->
+         the shared generic UI toolkit (JS/CSS). Exempting them lets the bundle load same-origin in
+         Polarion and lets the vite dev proxy fetch the toolkit without a Polarion session. Everything
+         else stays behind the `user` role constraint below. -->
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>All</web-resource-name>

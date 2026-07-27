@@ -61,7 +61,7 @@ export default function Landing() {
 
   return (
     <div className="page landing">
-      <h1>JSON Editor</h1>
+      <h1>Mail Workflow</h1>
       <p className="landing-intro">
         Experimental React UI. Pick a project scope and a feature below, or open one directly with{' '}
         <code>?feature=&lt;id&gt;&amp;scope=project/&lt;id&gt;/</code>.
