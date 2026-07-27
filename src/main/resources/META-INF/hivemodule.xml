@@ -22,7 +22,7 @@
                   parentNodeName="Mail Workflow"
                   parentNodeIconUrl="/polarion/mailworkflow-admin/ui/images/menu/30x30/_parent.svg"
                   iconUrl="/polarion/mailworkflow-admin/ui/images/menu/16x16/about.svg"
-                  pageUrl="/polarion/mailworkflow-admin/pages/about.jsp"
+                  pageUrl="/polarion/mailworkflow-app/ui/app/index.html?feature=about&amp;embedded=true&amp;scope=$scope$"
                   projectScope="true"
                   projectGroupScope="false"
                   repositoryScope="true"/>
