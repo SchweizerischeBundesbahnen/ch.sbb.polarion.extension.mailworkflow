@@ -11,14 +11,14 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
   window.history.replaceState({}, '', origUrl);
-  document.cookie = 'je-test=; path=/; max-age=0';
+  document.cookie = 'mailworkflow-test=; path=/; max-age=0';
 });
 
 describe('cookies', () => {
   it('round-trips a value and returns null for a missing one', () => {
-    expect(getCookie('je-test')).toBeNull();
-    setCookie('je-test', 'hello world');
-    expect(getCookie('je-test')).toBe('hello world');
+    expect(getCookie('mailworkflow-test')).toBeNull();
+    setCookie('mailworkflow-test', 'hello world');
+    expect(getCookie('mailworkflow-test')).toBe('hello world');
   });
 });
 
