@@ -54,6 +54,10 @@
 
         <ical4j.version>4.3.0</ical4j.version>
 
+        <!-- A broken README.md -> about.html conversion fails the build instead of shipping an
+             empty About page. markdown2html renders locally since 1.7.x - no GitHub API, no token -
+             so the same setting is right in CI, in a deploy job and on a developer machine. -->
+        <markdown2html-maven-plugin.failOnError>true</markdown2html-maven-plugin.failOnError>
     </properties>
 
     <dependencies>
@@ -132,6 +136,7 @@
                 <artifactId>swagger-maven-plugin-jakarta</artifactId>
                 <configuration>
                     <outputFormat>JSON</outputFormat>
+                    <!-- Stable ordering, so a rebuild does not reshuffle docs/openapi.json. -->
                     <resourcePackages>
                         <package>ch.sbb.polarion.extension.generic.rest.controller.info</package>
                         <package>ch.sbb.polarion.extension.generic.rest.model</package>
