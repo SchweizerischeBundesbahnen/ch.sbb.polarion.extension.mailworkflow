@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.1.1](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v4.1.0...v4.1.1) (2026-09-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v16.1.0 ([#153](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/153)) ([99bcabf](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/99bcabfcc3bbae56abdcec55a8703af54ee5197e))
+* **deps:** update dependency globals to v17.12.0 ([#155](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/155)) ([87a414b](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/87a414b9ab200fb70817d3150cbf2726f2480a0b))
+* **deps:** update dependency typescript-eslint to v8.69.0 ([#151](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/151)) ([4b8099a](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/4b8099af5739d53f9bf03349efe536e51987bda1))
+
 ## [4.1.0](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v4.0.2...v4.1.0) (2026-08-21)
 
 
