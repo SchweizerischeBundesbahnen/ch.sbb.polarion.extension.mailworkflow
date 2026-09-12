@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.1.1](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v4.1.0...v4.1.1) (2026-09-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/react-dom to v19.2.7 ([#157](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/157)) ([f540bef](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/f540befe6cb9808e7c956da2006c428859c365d0))
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v16.1.0 ([#153](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/153)) ([99bcabf](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/99bcabfcc3bbae56abdcec55a8703af54ee5197e))
+* **deps:** update dependency eslint to v10.10.0 ([#160](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/160)) ([2bc9bd1](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/2bc9bd1b88f8de158af57a5d152de5bf59d8268a))
+* **deps:** update dependency globals to v17.12.0 ([#155](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/155)) ([87a414b](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/87a414b9ab200fb70817d3150cbf2726f2480a0b))
+* **deps:** update dependency playwright to v1.63.0 ([#161](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/161)) ([f456959](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/f456959e9864c660db3ac04cb4abb9751428cfa4))
+* **deps:** update dependency typescript-eslint to v8.69.0 ([#151](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/151)) ([4b8099a](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/4b8099af5739d53f9bf03349efe536e51987bda1))
+* **deps:** update dependency typescript-eslint to v8.70.0 ([#162](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/162)) ([7e63133](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/7e631331887bfd6a2d91ead184fef18e34d2d426))
+
 ## [4.1.0](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v4.0.2...v4.1.0) (2026-08-21)
 
 
