@@ -1,5 +1,7 @@
+import { pageViolations } from '@sbb-polarion/react-sbb-polarion/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render } from 'vitest-browser-react';
+import { page } from 'vitest/browser';
 import App from '../src/App';
 import { findFeature } from '../src/features';
 import { installFetchMock, jsonResponse } from './mockFetch';
@@ -80,5 +82,60 @@ describe('App router', () => {
     await vi.waitFor(() => expect(document.querySelector('.about-table')).not.toBeNull());
     expect(document.body.textContent).toContain('Mail Workflow');
     expect(document.querySelector('.about-page .app-icon')).not.toBeNull();
+  });
+});
+
+describe('accessibility', () => {
+  async function mountLanding() {
+    installFetchMock([{ method: 'GET', match: /\/polarion\/rest\/v1\/projects/, json: PROJECTS }]);
+    window.history.replaceState({}, '', '?');
+    render(<App />);
+    await vi.waitFor(() => expect(document.querySelector('.landing-scope .sd-trigger')).not.toBeNull());
+    await vi.waitFor(() =>
+      expect(document.querySelector('.landing-scope option[value="project/elibrary/"]')).not.toBeNull(),
+    );
+  }
+
+  it('names the dev Landing scope control after its label', async () => {
+    await mountLanding();
+    expect(page.getByRole('combobox', { name: 'Project scope:' }).element()).toBeVisible();
+  });
+
+  it('has no WCAG A/AA violations on the dev Landing', async () => {
+    await mountLanding();
+    expect(await pageViolations()).toEqual([]);
+  });
+
+  it('has no WCAG A/AA violations on the dev Landing with a load error', async () => {
+    installFetchMock([
+      { method: 'GET', match: /\/polarion\/rest\/v1\/projects/, respond: () => jsonResponse({}, 401) },
+    ]);
+    window.history.replaceState({}, '', '?');
+    render(<App />);
+    await vi.waitFor(() => expect(document.querySelector('.landing .alert-error')).not.toBeNull());
+    await vi.waitFor(() => expect(document.querySelector('.landing-scope .sd-trigger')).not.toBeNull());
+    expect(await pageViolations()).toEqual([]);
+  });
+
+  it('has no WCAG A/AA violations on the About page', async () => {
+    installFetchMock(aboutRoutes());
+    window.history.replaceState({}, '', '?feature=about&embedded=true');
+    render(<App />);
+    await vi.waitFor(() => expect(document.querySelector('.about-table')).not.toBeNull());
+    await vi.waitFor(() => expect(document.body.textContent).toContain('Readme'));
+    expect(await pageViolations()).toEqual([]);
+  });
+
+  it('has no WCAG A/AA violations on the About page with an error alert', async () => {
+    installFetchMock([
+      { method: 'GET', match: /\/version$/, respond: () => jsonResponse({ errorMessage: 'boom' }, 500) },
+      { method: 'GET', match: /\/configuration-properties$/, json: { properties: [], obsoleteProperties: [] } },
+      { method: 'GET', match: /\/configuration-status/, json: [] },
+      { method: 'GET', match: /\/readme$/, respond: () => new Response('', { status: 404 }) },
+    ]);
+    window.history.replaceState({}, '', '?feature=about&embedded=true');
+    render(<App />);
+    await vi.waitFor(() => expect(document.querySelector('.alert-error')).not.toBeNull());
+    expect(await pageViolations()).toEqual([]);
   });
 });
