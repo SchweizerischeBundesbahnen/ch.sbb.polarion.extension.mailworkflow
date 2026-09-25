@@ -91,6 +91,9 @@ describe('accessibility', () => {
     window.history.replaceState({}, '', '?');
     render(<App />);
     await vi.waitFor(() => expect(document.querySelector('.landing-scope .sd-trigger')).not.toBeNull());
+    await vi.waitFor(() =>
+      expect(document.querySelector('.landing-scope option[value="project/elibrary/"]')).not.toBeNull(),
+    );
   }
 
   it('names the dev Landing scope control after its label', async () => {
