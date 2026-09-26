@@ -1,5 +1,30 @@
 # Changelog
 
+## [4.1.1](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v4.1.0...v4.1.1) (2026-09-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/node to v24.13.4 ([#165](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/165)) ([c907067](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/c9070671a127420e596b9d0754fec1c2449702bc))
+* **deps:** update dependency @types/node to v24.13.5 ([#173](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/173)) ([422b224](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/422b224b7ff382c08786e8c09434f1091380b468))
+* **deps:** update dependency @types/node to v24.13.6 ([#178](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/178)) ([f55e62e](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/f55e62ed90566f12d70b09a17ec23eac33dde1db))
+* **deps:** update dependency @types/react-dom to v19.2.7 ([#157](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/157)) ([f540bef](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/f540befe6cb9808e7c956da2006c428859c365d0))
+* **deps:** update dependency ch.sbb.polarion.extensions:ch.sbb.polarion.extension.generic to v16.1.0 ([#153](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/153)) ([99bcabf](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/99bcabfcc3bbae56abdcec55a8703af54ee5197e))
+* **deps:** update dependency eslint to v10.10.0 ([#160](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/160)) ([2bc9bd1](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/2bc9bd1b88f8de158af57a5d152de5bf59d8268a))
+* **deps:** update dependency eslint to v10.11.0 ([#177](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/177)) ([aec276a](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/aec276aafb7d769af2704451937edeb6fb8df868))
+* **deps:** update dependency globals to v17.12.0 ([#155](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/155)) ([87a414b](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/87a414b9ab200fb70817d3150cbf2726f2480a0b))
+* **deps:** update dependency playwright to v1.63.0 ([#161](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/161)) ([f456959](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/f456959e9864c660db3ac04cb4abb9751428cfa4))
+* **deps:** update dependency prettier to v3.9.7 ([#174](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/174)) ([90f227d](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/90f227dbdb49e1c7505dc47b272ae2c76823af36))
+* **deps:** update dependency prettier to v3.9.8 ([#175](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/175)) ([a07e119](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/a07e119fa77b1b49c2b29d90c433e6c3b0c1e82a))
+* **deps:** update dependency prettier to v3.9.9 ([#185](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/185)) ([1ba98a6](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/1ba98a6dbe2e71572836c398e5c1d216015f3e4e))
+* **deps:** update dependency typescript-eslint to v8.69.0 ([#151](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/151)) ([4b8099a](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/4b8099af5739d53f9bf03349efe536e51987bda1))
+* **deps:** update dependency typescript-eslint to v8.70.0 ([#162](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/162)) ([7e63133](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/7e631331887bfd6a2d91ead184fef18e34d2d426))
+* **deps:** update dependency typescript-eslint to v8.70.1 ([#180](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/180)) ([5ba91ae](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/5ba91aefe91de002755c2aa6ce2fcd58cc92b26e))
+* **deps:** update dependency vite to v8.3.0 ([#167](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/167)) ([7beb7dc](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/7beb7dc2c1ceff82a2029cd4c0301e2d72f97028))
+* **deps:** update npm to v12.1.0 ([#184](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/184)) ([fdde17c](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/fdde17cd0bf033dc1af9a860bf844dbf7c7c23c7))
+* **deps:** update react monorepo to v19.3.0 ([#166](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/166)) ([8336b59](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/8336b59d86228df85f9ca1eb43f5de23e1cb03b4))
+* **deps:** update vitest monorepo to v5.0.1 ([#172](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/issues/172)) ([d7405de](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/commit/d7405de728cd22ccae32c49593fd483f6651f1f8))
+
 ## [4.1.0](https://github.com/SchweizerischeBundesbahnen/ch.sbb.polarion.extension.mailworkflow/compare/v4.0.2...v4.1.0) (2026-08-21)
 
 
