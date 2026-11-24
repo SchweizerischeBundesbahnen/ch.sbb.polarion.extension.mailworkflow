@@ -48,20 +48,8 @@ class MessageConfiguratorTest {
 
         assertNotNull(message.getSentDate());
         assertTrue(Collections.list(message.getAllHeaderLines()).contains("X-MS-TNEF-Correlator"));
-        boolean containsMethodHeader = false;
-        boolean containsComponentHeader = false;
-        for (Header header : Collections.list(message.getAllHeaders())) {
-            if (header.getName().equalsIgnoreCase("Method")) {
-                containsMethodHeader = true;
-                assertEquals("REQUEST", header.getValue());
-            }
-            if (header.getName().equalsIgnoreCase("Component")) {
-                containsComponentHeader = true;
-                assertEquals("VEVENT", header.getValue());
-            }
-        }
-        assertTrue(containsMethodHeader);
-        assertTrue(containsComponentHeader);
+        assertArrayEquals(new String[]{"REQUEST"}, message.getHeader("Method"));
+        assertArrayEquals(new String[]{"VEVENT"}, message.getHeader("Component"));
 
         Object content = message.getContent();
         assertInstanceOf(Multipart.class, content);
@@ -71,20 +59,8 @@ class MessageConfiguratorTest {
         assertInstanceOf(MimeBodyPart.class, bodyPart);
 
         MimeBodyPart mimeBodyPart = (MimeBodyPart) bodyPart;
-        boolean containsContentClassHeader = false;
-        boolean containsContentIdHeader = false;
-        for (Header header : Collections.list(mimeBodyPart.getAllHeaders())) {
-            if (header.getName().equalsIgnoreCase("Content-Class")) {
-                containsContentClassHeader = true;
-                assertEquals("urn:content-classes:calendarmessage", header.getValue());
-            }
-            if (header.getName().equalsIgnoreCase("Content-ID")) {
-                containsContentIdHeader = true;
-                assertEquals("calendar_message", header.getValue());
-            }
-        }
-        assertTrue(containsContentClassHeader);
-        assertTrue(containsContentIdHeader);
+        assertArrayEquals(new String[]{"urn:content-classes:calendarmessage"}, mimeBodyPart.getHeader("Content-Class"));
+        assertArrayEquals(new String[]{"calendar_message"}, mimeBodyPart.getHeader("Content-ID"));
     }
 
     @Test
@@ -710,7 +686,7 @@ class MessageConfiguratorTest {
     @Test
     @SneakyThrows
     void testEventSequenceAsString() {
-        IWorkItem workItem = mockWorkItemWithSequence("5"); // parseable -> goes through Integer.parseInt
+        IWorkItem workItem = mockWorkItemWithSequence("5"); // parsable -> goes through Integer.parseInt
 
         IArguments arguments = mockCalendarArguments();
         when(arguments.getAsString(eq("eventSummary"), isNull())).thenReturn(null);
