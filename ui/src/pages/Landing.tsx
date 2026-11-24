@@ -71,7 +71,11 @@ export default function Landing() {
         <label htmlFor="landing-scope">Project scope:</label>
         <SearchableSelect id="landing-scope" value={scope} onChange={setScope} options={scopeOptions} placeholder="" />
       </div>
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && (
+        <div className="alert alert-error" role="alert" aria-live="assertive" aria-atomic="true">
+          {error}
+        </div>
+      )}
 
       <ul className="feature-list">
         {FEATURES.map((f) => (
