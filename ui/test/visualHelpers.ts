@@ -73,6 +73,14 @@ const frame = (): Promise<void> =>
   new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 
 /**
+ * The largest width difference, in CSS pixels, that does not count as resampling.
+ *
+ * `innerWidth` is an integer, but the rendered width can be fractional. Rounding alone can therefore
+ * make them differ by up to 1px; a larger difference means that the iframe was scaled.
+ */
+const RESAMPLE_TOLERANCE_PX = 1;
+
+/**
  * Fails the capture if Vitest had to scale the test iframe to fit the browser window.
  *
  * The window is sized in vitest.config.ts to be larger than every viewport the suites ask for, but the
@@ -87,7 +95,7 @@ function assertNotResampled(): void {
   }
   const rendered = frameElement.getBoundingClientRect().width;
   const requested = window.innerWidth;
-  if (rendered > 0 && Math.abs(rendered - requested) > 1) {
+  if (rendered > 0 && Math.abs(rendered - requested) > RESAMPLE_TOLERANCE_PX) {
     throw new Error(
       `The capture would be resampled: the test viewport is ${requested}px wide but is rendered at ` +
         `${Math.round(rendered)}px. Raise contextOptions.viewport in vitest.config.ts above every ` +
